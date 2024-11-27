@@ -1,15 +1,88 @@
 package com.cgvsu.render_engine;
-import javax.vecmath.*;
+
+import com.cgvsu.math.matrix.Matrix4f;
+import com.cgvsu.math.Vector3f;
+
+import javax.vecmath.Point2f;
 
 public class GraphicConveyor {
+    public static Matrix4f scaleMatrix4f(float scaleX, float scaleY, float scaleZ) {
+        float[][] matrix = new float[][]
+                {
+                        {scaleX, 0,0,0},
+                        {0, scaleY,0,0},
+                        {0,0,scaleZ,0},
+                        {0,0,0,1}
+                };
+        return new Matrix4f(matrix);
+    }
+
+    public static Matrix4f rotateX(float angleX) {
+        float cos = (float) Math.cos(Math.toRadians(angleX));
+        float sin = (float) Math.sin(Math.toRadians(angleX));
+        float[][] matrix = new float[][]
+                {
+                        {1,0,0,0},
+                        {0,cos, sin,0},
+                        {0,-sin, cos, 0},
+                        {0,0,0,1}
+                };
+        return new Matrix4f(matrix);
+    }
+
+    public static Matrix4f rotateY(float angleY) {
+        float cos = (float) Math.cos(Math.toRadians(angleY));
+        float sin = (float) Math.sin(Math.toRadians(angleY));
+        float[][] matrix = new float[][]
+                {
+                        {cos,0,sin,0},
+                        {0,1,0,0},
+                        {-sin,0,cos,0},
+                        {0,0,0,1}
+                };
+        return new Matrix4f(matrix);
+    }
+
+    public static Matrix4f rotateZ(float angleZ) {
+        float cos = (float) Math.cos(Math.toRadians(angleZ));
+        float sin = (float) Math.sin(Math.toRadians(angleZ));
+        float[][] matrix = new float[][]
+                {
+                        {cos,sin,0,0},
+                        {-sin, cos,0,0},
+                        {0,0,1,0},
+                        {0,0,0,1}
+                };
+        return new Matrix4f(matrix);
+    }
+
+    public static Matrix4f rotateMatrix4f(float angleX, float angleY, float angleZ) {
+        return Matrix4f.multiply(rotateZ(angleZ), Matrix4f.multiply(rotateY(angleY), rotateX(angleX)));
+    }
+
+    public static Matrix4f translationMatrix4f(float translationX, float translationY, float translationZ) {
+        float[][] matrix = new float[][]
+                {
+                        {1,0,0,translationX},
+                        {0,1,0,translationY},
+                        {0,0,1,translationZ},
+                        {0,0,0,1}
+                };
+        return new Matrix4f(matrix);
+    }
+
+    public static Matrix4f rotateScaleTranslate(
+            float scaleX, float scaleY, float scaleZ,
+            float angleX, float angleY, float angleZ,
+            float translationX, float translationY, float translationZ
+    ) {
+        return Matrix4f.multiply(
+                translationMatrix4f(translationX,translationY,translationZ),
+                Matrix4f.multiply(rotateMatrix4f(angleX,angleY,angleZ), scaleMatrix4f(scaleX,scaleY,scaleZ)));
+    }
 
     public static Matrix4f rotateScaleTranslate() {
-        float[] matrix = new float[]{
-                1, 0, 0, 0,
-                0, 1, 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1};
-        return new Matrix4f(matrix);
+        return rotateScaleTranslate(1,1,1,0,0,0,0,0,0);
     }
 
     public static Matrix4f lookAt(Vector3f eye, Vector3f target) {
@@ -17,23 +90,21 @@ public class GraphicConveyor {
     }
 
     public static Matrix4f lookAt(Vector3f eye, Vector3f target, Vector3f up) {
-        Vector3f resultX = new Vector3f();
-        Vector3f resultY = new Vector3f();
-        Vector3f resultZ = new Vector3f();
+        Vector3f resultZ = Vector3f.deduct(target, eye);
+        Vector3f resultX = Vector3f.crossProduct(up, resultZ);
+        Vector3f resultY = Vector3f.crossProduct(resultZ, resultX);
 
-        resultZ.sub(target, eye);
-        resultX.cross(up, resultZ);
-        resultY.cross(resultZ, resultX);
+        Vector3f resultXN = resultX.normalize();
+        Vector3f resultYN = resultY.normalize();
+        Vector3f resultZN = resultZ.normalize();
 
-        resultX.normalize();
-        resultY.normalize();
-        resultZ.normalize();
-
-        float[] matrix = new float[]{
-                resultX.x, resultY.x, resultZ.x, 0,
-                resultX.y, resultY.y, resultZ.y, 0,
-                resultX.z, resultY.z, resultZ.z, 0,
-                -resultX.dot(eye), -resultY.dot(eye), -resultZ.dot(eye), 1};
+        float[][] matrix = new float[][]
+                {
+                        {resultXN.getX(), resultYN.getX(), resultZN.getX(), -resultXN.dot(eye)},
+                        {resultXN.getY(), resultYN.getY(), resultZN.getY(), -resultYN.dot(eye)},
+                        {resultXN.getZ(), resultYN.getZ(), resultZN.getZ(), -resultZN.dot(eye)},
+                        {0, 0, 0, 1}
+                };
         return new Matrix4f(matrix);
     }
 
@@ -43,24 +114,17 @@ public class GraphicConveyor {
             final float nearPlane,
             final float farPlane) {
         Matrix4f result = new Matrix4f();
+        // Господи, за что ты так со мной, зачем нам нужен этот 0.5F ???
         float tangentMinusOnDegree = (float) (1.0F / (Math.tan(fov * 0.5F)));
-        result.m00 = tangentMinusOnDegree / aspectRatio;
-        result.m11 = tangentMinusOnDegree;
-        result.m22 = (farPlane + nearPlane) / (farPlane - nearPlane);
-        result.m23 = 1.0F;
-        result.m32 = 2 * (nearPlane * farPlane) / (nearPlane - farPlane);
+        result.setValue(0,0,tangentMinusOnDegree);
+        result.setValue(1,1,tangentMinusOnDegree / aspectRatio);
+        result.setValue(2,2,(farPlane + nearPlane) / (farPlane - nearPlane));
+        result.setValue(2,3,2 * (nearPlane * farPlane) / (nearPlane - farPlane));
+        result.setValue(3,2,1.0F);
         return result;
     }
 
-    public static Vector3f multiplyMatrix4ByVector3(final Matrix4f matrix, final Vector3f vertex) {
-        final float x = (vertex.x * matrix.m00) + (vertex.y * matrix.m10) + (vertex.z * matrix.m20) + matrix.m30;
-        final float y = (vertex.x * matrix.m01) + (vertex.y * matrix.m11) + (vertex.z * matrix.m21) + matrix.m31;
-        final float z = (vertex.x * matrix.m02) + (vertex.y * matrix.m12) + (vertex.z * matrix.m22) + matrix.m32;
-        final float w = (vertex.x * matrix.m03) + (vertex.y * matrix.m13) + (vertex.z * matrix.m23) + matrix.m33;
-        return new Vector3f(x / w, y / w, z / w);
-    }
-
     public static Point2f vertexToPoint(final Vector3f vertex, final int width, final int height) {
-        return new Point2f(vertex.x * width + width / 2.0F, -vertex.y * height + height / 2.0F);
+        return new Point2f(vertex.getX() * width + width / 2.0F, -vertex.getY() * height + height / 2.0F);
     }
 }
