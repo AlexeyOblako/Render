@@ -2,15 +2,30 @@ package com.cgvsu.render_engine;
 
 import java.util.ArrayList;
 
-import com.cgvsu.math.Vector3f;
+import com.cgvsu.math.Vector2f;
+import com.cgvsu.model.Polygon;
+import com.cgvsu.model.Triangle;
+import com.cgvsu.utils.ZBuffer;
+import com.cgvsu.utils.models_utils.ModelMeshDrawer;
+import com.cgvsu.utils.models_utils.ModelRasterizer;
+import com.cgvsu.utils.models_utils.Triangulation;
+import com.cgvsu.utils.triangles_utils.TriangleRasterization;
+
 import com.cgvsu.math.Vector4f;
-import com.cgvsu.model.Model;
+import com.cgvsu.utils.models_utils.ModelRasterizer;
+
 import javafx.scene.canvas.GraphicsContext;
-import javax.vecmath.*;
-import com.cgvsu.math.matrix.Matrix4f;
+import javafx.scene.image.PixelWriter;
 import javafx.scene.paint.Color;
 
+import com.cgvsu.model.Model;
+import com.cgvsu.math.Vector3f;
+import com.cgvsu.math.matrix.Matrix4f;
+
+import javax.vecmath.Point2f;
+
 import static com.cgvsu.render_engine.GraphicConveyor.*;
+
 
 public class RenderEngine {
 
@@ -48,7 +63,7 @@ public class RenderEngine {
                 Vector3f vertex = mesh.vertices.get(mesh.polygons.get(polygonInd).getVertexIndices().get(vertexInPolygonInd));
 
                 // TODO: 25.12.2023 Убрать этот костыль
-                com.cgvsu.math.Vector4f vertexVecmath = new Vector4f(vertex.getX(), vertex.getY(), vertex.getZ(), 1);
+                Vector4f vertexVecmath = new Vector4f(vertex.getX(), vertex.getY(), vertex.getZ(), 1);
 
                 Point2f resultPoint = vertexToPoint(Matrix4f.multiply(modelViewProjectionMatrix, vertexVecmath).normalizeTo3f(), width, height);
                 resultPoints.add(resultPoint);
