@@ -4,15 +4,9 @@ import java.util.ArrayList;
 
 import com.cgvsu.math.Vector2f;
 import com.cgvsu.model.Polygon;
-import com.cgvsu.model.Triangle;
-import com.cgvsu.utils.ZBuffer;
-import com.cgvsu.utils.models_utils.ModelMeshDrawer;
-import com.cgvsu.utils.models_utils.ModelRasterizer;
-import com.cgvsu.utils.models_utils.Triangulation;
-import com.cgvsu.utils.triangles_utils.TriangleRasterization;
 
 import com.cgvsu.math.Vector4f;
-import com.cgvsu.utils.models_utils.ModelRasterizer;
+
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.PixelWriter;
@@ -44,7 +38,6 @@ public class RenderEngine {
 
         Matrix4f modelViewProjectionMatrix = Matrix4f.multiply(projectionMatrix, Matrix4f.multiply(viewMatrix, modelMatrix));
 
-        ArrayList<ArrayList<Float>> buffer = ZBuffer.getDefaultPixelDepthMatrix(width,height);
 
 //        ModelRasterizer.rasterizeModel(graphicsContext, mesh.triangulatedCopy, modelViewProjectionMatrix, width, height, Color.BISQUE, buffer);
 //        ModelMeshDrawer.drawMesh(graphicsContext, mesh, modelViewProjectionMatrix, width, height, buffer);
