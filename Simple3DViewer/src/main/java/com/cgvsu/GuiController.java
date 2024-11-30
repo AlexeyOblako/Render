@@ -1,6 +1,7 @@
 package com.cgvsu;
 
 import com.cgvsu.render_engine.RenderEngine;
+import com.cgvsu.render_engine.ModelTransform;
 import javafx.fxml.FXML;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -11,12 +12,13 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.io.IOException;
 import java.io.File;
-import com.cgvsu.math.Vector3f;
 
+import com.cgvsu.math.Vector3f;
 import com.cgvsu.model.Model;
 import com.cgvsu.objreader.ObjReader;
 import com.cgvsu.render_engine.Camera;
@@ -38,6 +40,8 @@ public class GuiController {
             new Vector3f(0, 0, 0),
             1.0F, 1, 0.01F, 100);
 
+    private ModelTransform transform = new ModelTransform(); // Объект для управления трансформацией модели
+
     private Timeline timeline;
 
     @FXML
@@ -56,7 +60,8 @@ public class GuiController {
             camera.setAspectRatio((float) (width / height));
 
             if (mesh != null) {
-                RenderEngine.render(canvas.getGraphicsContext2D(), camera, mesh, (int) width, (int) height, false);
+                // Изменил
+                RenderEngine.render(canvas.getGraphicsContext2D(), camera, mesh, transform, (int) width, (int) height, false);
             }
         });
 
@@ -82,10 +87,52 @@ public class GuiController {
             mesh = ObjReader.read(fileContent);
             // todo: обработка ошибок
         } catch (IOException exception) {
-
+            exception.printStackTrace();
         }
     }
 
+    // Добавил методов для упр трнсфрц модлй
+    @FXML
+    public void handleScaleUp(ActionEvent actionEvent) {
+        transform.setScale(transform.getScaleX() * 1.1F, transform.getScaleY() * 1.1F, transform.getScaleZ() * 1.1F);
+    }
+
+    @FXML
+    public void handleScaleDown(ActionEvent actionEvent) {
+        transform.setScale(transform.getScaleX() * 0.9F, transform.getScaleY() * 0.9F, transform.getScaleZ() * 0.9F);
+    }
+
+    @FXML
+    public void handleRotateX(ActionEvent actionEvent) {
+        transform.setRotation(transform.getRotationX() + 10, transform.getRotationY(), transform.getRotationZ());
+    }
+
+    @FXML
+    public void handleRotateY(ActionEvent actionEvent) {
+        transform.setRotation(transform.getRotationX(), transform.getRotationY() + 10, transform.getRotationZ());
+    }
+
+    @FXML
+    public void handleRotateZ(ActionEvent actionEvent) {
+        transform.setRotation(transform.getRotationX(), transform.getRotationY(), transform.getRotationZ() + 10);
+    }
+
+    @FXML
+    public void handleTranslateX(ActionEvent actionEvent) {
+        transform.setTranslation(transform.getTranslationX() + TRANSLATION, transform.getTranslationY(), transform.getTranslationZ());
+    }
+
+    @FXML
+    public void handleTranslateY(ActionEvent actionEvent) {
+        transform.setTranslation(transform.getTranslationX(), transform.getTranslationY() + TRANSLATION, transform.getTranslationZ());
+    }
+
+    @FXML
+    public void handleTranslateZ(ActionEvent actionEvent) {
+        transform.setTranslation(transform.getTranslationX(), transform.getTranslationY(), transform.getTranslationZ() + TRANSLATION);
+    }
+
+    // Методы управления камерой
     @FXML
     public void handleCameraForward(ActionEvent actionEvent) {
         camera.movePosition(new Vector3f(0, 0, -TRANSLATION));
