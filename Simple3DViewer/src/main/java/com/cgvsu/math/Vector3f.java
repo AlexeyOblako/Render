@@ -3,6 +3,7 @@ package com.cgvsu.math;
 public class Vector3f {
     // TODO: 26.11.2024 сделать приватными переменные
     public float x, y, z;
+
     public Vector3f(float x, float y, float z) {
         this.x = x;
         this.y = y;
@@ -35,31 +36,33 @@ public class Vector3f {
     public float getZ() {
         return z;
     }
+
     public float get(int index) {
-        switch (index){
-            case 0: return x;
-            case 1: return y;
-            case 2: return z;
+        switch (index) {
+            case 0:
+                return x;
+            case 1:
+                return y;
+            case 2:
+                return z;
         }
         throw new IllegalArgumentException("Index out of bounds");
     }
 
-    public void add(Vector3f other){
-        this.x += other.x;
-        this.y += other.y;
-        this.z += other.z;
+    public Vector3f add(Vector3f other) {
+        return new Vector3f(this.x + other.x, this.y + other.y, this.z + other.z);
     }
 
     public static Vector3f add(Vector3f first, Vector3f second) {
         return new Vector3f(
                 first.x + second.x,
-                first.y + second.x,
+                first.y + second.y,
                 first.z + second.z
         );
     }
 
     //Вычитание векторов
-    public Vector3f deduct(Vector3f other){
+    public Vector3f deduct(Vector3f other) {
         return new Vector3f(
                 this.x - other.x,
                 this.y - other.y,
@@ -76,28 +79,31 @@ public class Vector3f {
     }
 
     //Умножение на скаляр
-    public Vector3f multiply(float scalar){
+    public Vector3f multiply(float scalar) {
         return new Vector3f(
                 this.x * scalar,
                 this.y * scalar,
                 this.z * scalar
         );
     }
+
     //Деление на скаляр
-    public Vector3f divide(float scalar){
-        if (scalar == 0){
+    public Vector3f divide(float scalar) {
+        if (scalar == 0) {
             throw new ArithmeticException("Dividing by zero is undefined and not allowed");
         }
         return new Vector3f(
-                this.x/scalar,
-                this.y/scalar,
-                this.z/scalar
+                this.x / scalar,
+                this.y / scalar,
+                this.z / scalar
         );
     }
+
     //Вычисление длины вектора
-    public float length(){
-        return (float) Math.sqrt(x*x + y*y + z*z);
+    public float length() {
+        return (float) Math.sqrt(x * x + y * y + z * z);
     }
+
     //Нормализация вектора
     public Vector3f normalize() {
         float normalization = length() > 0 ? 1 / length() : 0;
@@ -109,9 +115,10 @@ public class Vector3f {
     }
 
     //Скалярное произведение векторов
-    public float dot(Vector3f other){
+    public float dot(Vector3f other) {
         return this.x * other.x + this.y * other.y + this.z * other.z;
     }
+
     // Векторное произведение векторов
     public Vector3f crossProduct(Vector3f other) {
         return new Vector3f(
@@ -129,7 +136,7 @@ public class Vector3f {
         );
     }
 
-    public boolean equals(Vector3f vector3f){
+    public boolean equals(Vector3f vector3f) {
         return Math.abs(this.x - vector3f.x) <= 10e-6 &&
                 Math.abs(this.y - vector3f.y) <= 10e-6 &&
                 Math.abs(this.z - vector3f.z) <= 10e-6;
