@@ -90,6 +90,59 @@ public class GuiController {
             exception.printStackTrace();
         }
     }
+//для сохраннеия модели
+@FXML
+private void saveOriginalModel() {
+    if (mesh == null) {
+        System.out.println("No model loaded to save.");
+        return;
+    }
+
+    FileChooser fileChooser = new FileChooser();
+    fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
+    fileChooser.setTitle("Save Original Model");
+
+    File file = fileChooser.showSaveDialog((Stage) canvas.getScene().getWindow());
+    if (file == null) {
+        return;
+    }
+
+    try {
+        // Используем оригинальные вершины для экспорта
+        String modelData = mesh.toObjFormat(true); // Передаём true для сохранения оригинальных вершин
+        Files.writeString(file.toPath(), modelData);
+        System.out.println("Original model saved to " + file.getAbsolutePath());
+    } catch (IOException exception) {
+        System.out.println("Error saving model: " + exception.getMessage());
+    }
+}
+
+
+    @FXML
+    private void saveTransformedModel() {
+        if (mesh == null) {
+            System.out.println("No model loaded to save.");
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
+        fileChooser.setTitle("Save Transformed Model");
+
+        File file = fileChooser.showSaveDialog((Stage) canvas.getScene().getWindow());
+        if (file == null) {
+            return;
+        }
+
+        try {
+            // Используем текущие (трансформированные) вершины для экспорта
+            String modelData = mesh.toObjFormat(false); // Передаём false для сохранения трансформированных вершин
+            Files.writeString(file.toPath(), modelData);
+            System.out.println("Transformed model saved to " + file.getAbsolutePath());
+        } catch (IOException exception) {
+            System.out.println("Error saving model: " + exception.getMessage());
+        }
+    }
 
     // Добавил методов для упр трнсфрц модлй
     @FXML
