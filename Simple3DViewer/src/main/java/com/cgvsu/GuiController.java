@@ -1,31 +1,33 @@
 package com.cgvsu;
 
 import com.cgvsu.render_engine.RenderEngine;
-import com.cgvsu.render_engine.ModelTransform;
 import javafx.fxml.FXML;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.io.IOException;
 import java.io.File;
-
 import com.cgvsu.math.Vector3f;
+
 import com.cgvsu.model.Model;
 import com.cgvsu.objreader.ObjReader;
 import com.cgvsu.render_engine.Camera;
+import com.cgvsu.ObjWriter;
 
 public class GuiController {
 
     final private float TRANSLATION = 0.5F;
+    final private float SCALE = 0.1F;
+    final private float ROTATION = 10F;
 
     @FXML
     AnchorPane anchorPane;
@@ -39,8 +41,6 @@ public class GuiController {
             new Vector3f(0, 0, 100),
             new Vector3f(0, 0, 0),
             1.0F, 1, 0.01F, 100);
-
-    private ModelTransform transform = new ModelTransform(); // Объект для управления трансформацией модели
 
     private Timeline timeline;
 
@@ -60,13 +60,16 @@ public class GuiController {
             camera.setAspectRatio((float) (width / height));
 
             if (mesh != null) {
-                // Изменил
-                RenderEngine.render(canvas.getGraphicsContext2D(), camera, mesh, transform, (int) width, (int) height, false);
+                RenderEngine.render(canvas.getGraphicsContext2D(), camera, mesh, (int) width, (int) height);
             }
         });
 
         timeline.getKeyFrames().add(frame);
         timeline.play();
+
+
+        canvas.setOnMousePressed(this::handleMousePressed);
+        canvas.setOnMouseDragged(this::handleMouseDragged);
     }
 
     @FXML
@@ -85,70 +88,47 @@ public class GuiController {
         try {
             String fileContent = Files.readString(fileName);
             mesh = ObjReader.read(fileContent);
-            // todo: обработка ошибок
+
+
+            mesh.resetTransformations();
+
         } catch (IOException exception) {
-            exception.printStackTrace();
+
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//для сохраннеия модели
-@FXML
-private void saveOriginalModel() {
-    if (mesh == null) {
-        System.out.println("No model loaded to save.");
-        return;
-    }
-
-    FileChooser fileChooser = new FileChooser();
-    fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
-    fileChooser.setTitle("Save Original Model");
-
-    File file = fileChooser.showSaveDialog((Stage) canvas.getScene().getWindow());
-    if (file == null) {
-        return;
-    }
-
-    try {
-        // Используем оригинальные вершины для экспорта
-        String modelData = mesh.toObjFormat(true); // Передаём true для сохранения оригинальных вершин
-        Files.writeString(file.toPath(), modelData);
-        System.out.println("Original model saved to " + file.getAbsolutePath());
-    } catch (IOException exception) {
-        System.out.println("Error saving model: " + exception.getMessage());
-    }
-}
-
-
     @FXML
-    private void saveTransformedModel() {
+    private void onSaveOriginalModelMenuItemClick() {
         if (mesh == null) {
-            System.out.println("No model loaded to save.");
             return;
         }
 
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
+        fileChooser.setTitle("Save Original Model");
+
+        File file = fileChooser.showSaveDialog((Stage) canvas.getScene().getWindow());
+        if (file == null) {
+            return;
+        }
+
+        Path fileName = Path.of(file.getAbsolutePath());
+
+        try {
+
+            String originalModelContent = ObjWriter.write(mesh, false);
+            Files.writeString(fileName, originalModelContent);
+        } catch (IOException exception) {
+
+        }
+    }
+
+    @FXML
+    private void onSaveTransformedModelMenuItemClick() {
+        if (mesh == null) {
+
+            return;
+        }
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
         fileChooser.setTitle("Save Transformed Model");
@@ -158,79 +138,17 @@ private void saveOriginalModel() {
             return;
         }
 
+        Path fileName = Path.of(file.getAbsolutePath());
+
         try {
-            // Используем текущие (трансформированные) вершины для экспорта
-            String modelData = mesh.toObjFormat(false); // Передаём false для сохранения трансформированных вершин
-            Files.writeString(file.toPath(), modelData);
-            System.out.println("Transformed model saved to " + file.getAbsolutePath());
+
+            String transformedModelContent = ObjWriter.write(mesh);
+            Files.writeString(fileName, transformedModelContent);
         } catch (IOException exception) {
-            System.out.println("Error saving model: " + exception.getMessage());
+
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // Добавил методов для упр трнсфрц модлй
-    @FXML
-    public void handleScaleUp(ActionEvent actionEvent) {
-        transform.setScale(transform.getScaleX() * 1.1F, transform.getScaleY() * 1.1F, transform.getScaleZ() * 1.1F);
-    }
-
-    @FXML
-    public void handleScaleDown(ActionEvent actionEvent) {
-        transform.setScale(transform.getScaleX() * 0.9F, transform.getScaleY() * 0.9F, transform.getScaleZ() * 0.9F);
-    }
-
-    @FXML
-    public void handleRotateX(ActionEvent actionEvent) {
-        transform.setRotation(transform.getRotationX() + 10, transform.getRotationY(), transform.getRotationZ());
-    }
-
-    @FXML
-    public void handleRotateY(ActionEvent actionEvent) {
-        transform.setRotation(transform.getRotationX(), transform.getRotationY() + 10, transform.getRotationZ());
-    }
-
-    @FXML
-    public void handleRotateZ(ActionEvent actionEvent) {
-        transform.setRotation(transform.getRotationX(), transform.getRotationY(), transform.getRotationZ() + 10);
-    }
-
-    @FXML
-    public void handleTranslateX(ActionEvent actionEvent) {
-        transform.setTranslation(transform.getTranslationX() + TRANSLATION, transform.getTranslationY(), transform.getTranslationZ());
-    }
-
-    @FXML
-    public void handleTranslateY(ActionEvent actionEvent) {
-        transform.setTranslation(transform.getTranslationX(), transform.getTranslationY() + TRANSLATION, transform.getTranslationZ());
-    }
-
-    @FXML
-    public void handleTranslateZ(ActionEvent actionEvent) {
-        transform.setTranslation(transform.getTranslationX(), transform.getTranslationY(), transform.getTranslationZ() + TRANSLATION);
-    }
-
-    // Методы управления камерой
     @FXML
     public void handleCameraForward(ActionEvent actionEvent) {
         camera.movePosition(new Vector3f(0, 0, -TRANSLATION));
@@ -260,4 +178,177 @@ private void saveOriginalModel() {
     public void handleCameraDown(ActionEvent actionEvent) {
         camera.movePosition(new Vector3f(0, -TRANSLATION, 0));
     }
+
+    @FXML
+    public void handleModelScaleX(ActionEvent actionEvent) {
+        if (mesh != null) {
+            Vector3f scale = mesh.getScale();
+            mesh.setScale(new Vector3f(scale.getX() + SCALE, scale.getY(), scale.getZ()));
+        }
+    }
+
+    @FXML
+    public void handleModelScaleY(ActionEvent actionEvent) {
+        if (mesh != null) {
+            Vector3f scale = mesh.getScale();
+            mesh.setScale(new Vector3f(scale.getX(), scale.getY() + SCALE, scale.getZ()));
+        }
+    }
+
+    @FXML
+    public void handleModelScaleZ(ActionEvent actionEvent) {
+        if (mesh != null) {
+            Vector3f scale = mesh.getScale();
+            mesh.setScale(new Vector3f(scale.getX(), scale.getY(), scale.getZ() + SCALE));
+        }
+    }
+
+    @FXML
+    public void handleModelRotateX(ActionEvent actionEvent) {
+        if (mesh != null) {
+            Vector3f rotation = mesh.getRotation();
+            mesh.setRotation(new Vector3f(rotation.getX() + ROTATION, rotation.getY(), rotation.getZ()));
+        }
+    }
+
+    @FXML
+    public void handleModelRotateY(ActionEvent actionEvent) {
+        if (mesh != null) {
+            Vector3f rotation = mesh.getRotation();
+            mesh.setRotation(new Vector3f(rotation.getX(), rotation.getY() + ROTATION, rotation.getZ()));
+        }
+    }
+
+    @FXML
+    public void handleModelRotateZ(ActionEvent actionEvent) {
+        if (mesh != null) {
+            Vector3f rotation = mesh.getRotation();
+            mesh.setRotation(new Vector3f(rotation.getX(), rotation.getY(), rotation.getZ() + ROTATION));
+        }
+    }
+
+    @FXML
+    public void handleModelTranslateX(ActionEvent actionEvent) {
+        if (mesh != null) {
+            Vector3f translation = mesh.getTranslation();
+            mesh.setTranslation(new Vector3f(translation.getX() + TRANSLATION, translation.getY(), translation.getZ()));
+        }
+    }
+
+    @FXML
+    public void handleModelTranslateY(ActionEvent actionEvent) {
+        if (mesh != null) {
+            Vector3f translation = mesh.getTranslation();
+            mesh.setTranslation(new Vector3f(translation.getX(), translation.getY() + TRANSLATION, translation.getZ()));
+        }
+    }
+
+    @FXML
+    public void handleModelTranslateZ(ActionEvent actionEvent) {
+        if (mesh != null) {
+            Vector3f translation = mesh.getTranslation();
+            mesh.setTranslation(new Vector3f(translation.getX(), translation.getY(), translation.getZ() + TRANSLATION));
+        }
+    }
+
+    @FXML
+    public void handleModelScaleXNegative(ActionEvent actionEvent) {
+        if (mesh != null) {
+            Vector3f scale = mesh.getScale();
+            mesh.setScale(new Vector3f(scale.getX() - SCALE, scale.getY(), scale.getZ()));
+        }
+    }
+
+    @FXML
+    public void handleModelScaleYNegative(ActionEvent actionEvent) {
+        if (mesh != null) {
+            Vector3f scale = mesh.getScale();
+            mesh.setScale(new Vector3f(scale.getX(), scale.getY() - SCALE, scale.getZ()));
+        }
+    }
+
+    @FXML
+    public void handleModelScaleZNegative(ActionEvent actionEvent) {
+        if (mesh != null) {
+            Vector3f scale = mesh.getScale();
+            mesh.setScale(new Vector3f(scale.getX(), scale.getY(), scale.getZ() - SCALE));
+        }
+    }
+
+    @FXML
+    public void handleModelRotateXNegative(ActionEvent actionEvent) {
+        if (mesh != null) {
+            Vector3f rotation = mesh.getRotation();
+            mesh.setRotation(new Vector3f(rotation.getX() - ROTATION, rotation.getY(), rotation.getZ()));
+        }
+    }
+
+    @FXML
+    public void handleModelRotateYNegative(ActionEvent actionEvent) {
+        if (mesh != null) {
+            Vector3f rotation = mesh.getRotation();
+            mesh.setRotation(new Vector3f(rotation.getX(), rotation.getY() - ROTATION, rotation.getZ()));
+        }
+    }
+
+    @FXML
+    public void handleModelRotateZNegative(ActionEvent actionEvent) {
+        if (mesh != null) {
+            Vector3f rotation = mesh.getRotation();
+            mesh.setRotation(new Vector3f(rotation.getX(), rotation.getY(), rotation.getZ() - ROTATION));
+        }
+    }
+
+    @FXML
+    public void handleModelTranslateXNegative(ActionEvent actionEvent) {
+        if (mesh != null) {
+            Vector3f translation = mesh.getTranslation();
+            mesh.setTranslation(new Vector3f(translation.getX() - TRANSLATION, translation.getY(), translation.getZ()));
+        }
+    }
+
+    @FXML
+    public void handleModelTranslateYNegative(ActionEvent actionEvent) {
+        if (mesh != null) {
+            Vector3f translation = mesh.getTranslation();
+            mesh.setTranslation(new Vector3f(translation.getX(), translation.getY() - TRANSLATION, translation.getZ()));
+        }
+    }
+
+    @FXML
+    public void handleModelTranslateZNegative(ActionEvent actionEvent) {
+        if (mesh != null) {
+            Vector3f translation = mesh.getTranslation();
+            mesh.setTranslation(new Vector3f(translation.getX(), translation.getY(), translation.getZ() - TRANSLATION));
+        }
+    }
+
+    private void handleMousePressed(MouseEvent event) {
+        lastMouseX = event.getX();
+        lastMouseY = event.getY();
+    }
+
+    private void handleMouseDragged(MouseEvent event) {
+        if (mesh != null) {
+            double deltaX = event.getX() - lastMouseX;
+            double deltaY = event.getY() - lastMouseY;
+
+            if (event.isPrimaryButtonDown()) {
+                Vector3f rotation = mesh.getRotation();
+                mesh.setRotation(new Vector3f(rotation.getX() - (float) (deltaY * 0.5), rotation.getY() - (float) (deltaX * 0.5), rotation.getZ()));
+            } else if (event.isMiddleButtonDown()) {
+                Vector3f scale = mesh.getScale();
+                mesh.setScale(new Vector3f(scale.getX() + (float) (deltaY * 0.01), scale.getY() + (float) (deltaY * 0.01), scale.getZ() + (float) (deltaY * 0.01)));
+            } else if (event.isSecondaryButtonDown()) {
+                Vector3f translation = mesh.getTranslation();
+                mesh.setTranslation(new Vector3f(translation.getX() - (float) (deltaX * 0.1), translation.getY() - (float) (deltaY * 0.1), translation.getZ()));
+            }
+
+            lastMouseX = event.getX();
+            lastMouseY = event.getY();
+        }
+    }
+
+    private double lastMouseX = 0;
+    private double lastMouseY = 0;
 }

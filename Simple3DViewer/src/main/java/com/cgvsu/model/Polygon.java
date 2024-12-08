@@ -8,10 +8,11 @@ public class Polygon {
     private ArrayList<Integer> textureVertexIndices;
     private ArrayList<Integer> normalIndices;
 
+
     public Polygon() {
-        vertexIndices = new ArrayList<>();
-        textureVertexIndices = new ArrayList<>();
-        normalIndices = new ArrayList<>();
+        vertexIndices = new ArrayList<Integer>();
+        textureVertexIndices = new ArrayList<Integer>();
+        normalIndices = new ArrayList<Integer>();
     }
 
     public void setVertexIndices(ArrayList<Integer> vertexIndices) {
