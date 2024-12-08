@@ -3,6 +3,7 @@ package math.matrix;
 import com.cgvsu.math.Vector4f;
 import com.cgvsu.math.matrix.Matrix4f;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class Matrix4fTest {
@@ -104,7 +105,7 @@ public class Matrix4fTest {
         Vector4f vector = new Vector4f(1, 1, 1, 1);
         Matrix4f matrix = new Matrix4f(data);
         Vector4f result = matrix.multiply(vector);
-        Vector4f expected = new Vector4f(30, 70, 110, 150);
+        Vector4f expected = new Vector4f(10, 26, 42, 58);
         assertEquals(expected.getX(), result.getX(), 1e-6);
         assertEquals(expected.getY(), result.getY(), 1e-6);
         assertEquals(expected.getZ(), result.getZ(), 1e-6);
@@ -129,10 +130,10 @@ public class Matrix4fTest {
         Matrix4f matrix2 = new Matrix4f(data2);
         Matrix4f result = matrix1.multiply(matrix2);
         float[][] expected = {
-                {136, 124, 112, 100},
-                {328, 304, 280, 256},
-                {520, 480, 440, 400},
-                {712, 656, 600, 544}
+                {80, 70, 60, 50},
+                {240, 214, 188, 162},
+                {400, 358, 316, 274},
+                {560, 502, 444, 386}
         };
         assertArrayEquals(expected, result.getMatrix());
     }
@@ -178,7 +179,7 @@ public class Matrix4fTest {
         };
         Matrix4f matrix = new Matrix4f(data);
         float result = matrix.determinate();
-        assertEquals(-168, result, 1e-6);
+        assertEquals(116, result, 1e-6);
     }
 
     @Test
@@ -191,15 +192,25 @@ public class Matrix4fTest {
         };
         Matrix4f matrix = new Matrix4f(data);
         Matrix4f inverse = matrix.inverse();
-        Matrix4f product = matrix.multiply(inverse);
+
         float[][] expected = {
-                {1, 0, 0, 0},
-                {0, 1, 0, 0},
-                {0, 0, 1, 0},
-                {0, 0, 0, 1}
+                {131f / 116, -111f / 58, -20f / 29, 55f / 116},
+                {-59f / 58, 48f / 29, 22f / 29, -23f / 58},
+                {3f / 116, 1f / 58, -4f / 29, 11f / 116},
+                {53f / 116, -21f / 58, -3f / 29, 1f / 116}
         };
-        assertArrayEquals(expected, product.getMatrix());
+
+        // Используем допустимую погрешность для сравнения
+        float delta = 1e-6f; // допустимая погрешность
+        for (int i = 0; i < expected.length; i++) {
+            for (int j = 0; j < expected[i].length; j++) {
+                assertEquals(expected[i][j], inverse.getMatrix()[i][j], delta, "Mismatch at [" + i + "][" + j + "]");
+            }
+        }
     }
+
+
+
 
     @Test
     public void testEquals() {

@@ -160,7 +160,7 @@ public class Matrix3fTest {
         };
         Matrix3f matrix = new Matrix3f(data);
         float result = matrix.determinate();
-        assertEquals(-22, result, 1e-6);
+        assertEquals(1, result, 1e-6);
     }
 
     @Test

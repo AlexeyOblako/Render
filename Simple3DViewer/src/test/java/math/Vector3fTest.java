@@ -150,7 +150,8 @@ public class Vector3fTest {
     public void testVertex3fToVector2f() {
         Vector3f vertex = new Vector3f(1.0f, 2.0f, 3.0f);
         Vector2f result = Vector3f.vertex3fToVector2f(vertex, 100, 100);
-        assertEquals(150.0f, result.getX());
-        assertEquals(0.0f, result.getY());
+        assertEquals(150.0f, result.getX(), 1e-5f);
+        assertEquals(-150.0f, result.getY(), 1e-5f);
     }
+
 }

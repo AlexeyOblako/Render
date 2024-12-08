@@ -2,13 +2,6 @@ package com.cgvsu.math.matrix;
 
 import com.cgvsu.math.Vector3f;
 
-//   – Операции сложения и вычитания
-//   – Умножения на соответствующий вектор 3 или 4. Здесь и дальше по
-//     курсу работаем с векторами-столбцами
-//   – Перемножения матриц
-//   – Транспонирования
-//   – Быстрого задания единичной и нулевой матрицы (через конструктор
-//     или метод)
 public class Matrix3f {
     private float[][] matrix = new float[3][3];
 
@@ -18,7 +11,6 @@ public class Matrix3f {
         }
         this.matrix = data;
     }
-
 
     public Matrix3f() {
         this.matrix = new float[][]
@@ -33,7 +25,7 @@ public class Matrix3f {
         return matrix;
     }
 
-    //Сложение матриц
+    // Сложение матриц
     public Matrix3f add(Matrix3f other) {
         if (other == null) {
             throw new NullPointerException("Matrix can't be null");
@@ -47,7 +39,7 @@ public class Matrix3f {
         return new Matrix3f(result);
     }
 
-    //Вычитание матриц
+    // Вычитание матриц
     public Matrix3f deduct(Matrix3f other) {
         if (other == null) {
             throw new NullPointerException("Matrix can't be null");
@@ -61,7 +53,7 @@ public class Matrix3f {
         return new Matrix3f(result);
     }
 
-    //Умножение на вектор
+    // Умножение на вектор
     public Vector3f multiply(Vector3f vector) {
         if (vector == null) {
             throw new NullPointerException("Vector can't be null");
@@ -94,7 +86,7 @@ public class Matrix3f {
         return new Vector3f(result);
     }
 
-    //Умножение на матрицу
+    // Умножение на матрицу
     public Matrix3f multiply(Matrix3f other) {
         if (other == null) {
             throw new NullPointerException("Matrix can't be null");
@@ -148,9 +140,19 @@ public class Matrix3f {
         return new Matrix3f(unitMatrix);
     }
 
-    //Вычисление детерминанта
+    // Вычисление детерминанта
     public float determinate() {
-        return (matrix[0][0] * matrix[1][1] * matrix[2][2] - (matrix[0][2] * matrix[1][1] * matrix[2][0]) + matrix[0][1] * matrix[1][2] * matrix[2][0] - (matrix[0][1] * matrix[1][0] * matrix[2][2]) + matrix[0][2] * matrix[1][0] * matrix[2][1] - (matrix[0][0] * matrix[1][2] * matrix[2][1]));
+        float a = matrix[0][0];
+        float b = matrix[0][1];
+        float c = matrix[0][2];
+        float d = matrix[1][0];
+        float e = matrix[1][1];
+        float f = matrix[1][2];
+        float g = matrix[2][0];
+        float h = matrix[2][1];
+        float i = matrix[2][2];
+
+        return a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
     }
 
     public Matrix3f inverse() {
@@ -158,22 +160,25 @@ public class Matrix3f {
         if (det == 0) {
             throw new NullPointerException("There is no inverse matrix, since the determinant is zero");
         }
-        float[][] matrix = this.minor().getMatrix();
+        float[][] minorMatrix = this.minor().getMatrix();
+        float[][] cofactorMatrix = new float[3][3];
 
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                matrix[i][j] = matrix[i][j] / det;
-                if ((i + j) % 2 != 0) {
-                    matrix[i][j] *= -1;
-                }
+                cofactorMatrix[i][j] = minorMatrix[i][j] * (float) Math.pow(-1, i + j);
             }
         }
 
-        Matrix3f result = new Matrix3f(matrix);
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                cofactorMatrix[i][j] = cofactorMatrix[i][j] / det;
+            }
+        }
+
+        Matrix3f result = new Matrix3f(cofactorMatrix);
         result = result.transpose();
 
         return result;
-
     }
 
     public Matrix3f minor() {
@@ -204,7 +209,11 @@ public class Matrix3f {
         return new Matrix3f(minor);
     }
 
-    public boolean equals(Matrix3f matrix3f) {
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Matrix3f matrix3f = (Matrix3f) obj;
         int length = this.matrix.length;
 
         for (int i = 0; i < length; i++) {
@@ -215,5 +224,16 @@ public class Matrix3f {
             }
         }
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                result = 31 * result + Float.floatToIntBits(matrix[i][j]);
+            }
+        }
+        return result;
     }
 }

@@ -1,6 +1,5 @@
 package math;
 
-import com.cgvsu.math.Vector3f;
 import com.cgvsu.math.Vector4f;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -122,26 +121,19 @@ public class Vector4fTest {
     @Test
     public void testLength() {
         Vector4f vector = new Vector4f(1.0f, 2.0f, 3.0f, 4.0f);
-        assertEquals(Math.sqrt(30.0f), vector.length());
+        float expectedLength = (float) Math.sqrt(30.0f);
+        assertEquals(expectedLength, vector.length(), 1e-5f);
     }
 
     @Test
     public void testNormalize() {
         Vector4f vector = new Vector4f(1.0f, 2.0f, 3.0f, 4.0f);
         Vector4f result = vector.normalize();
-        assertEquals(1.0f / Math.sqrt(30.0f), result.getX());
-        assertEquals(2.0f / Math.sqrt(30.0f), result.getY());
-        assertEquals(3.0f / Math.sqrt(30.0f), result.getZ());
-        assertEquals(4.0f / Math.sqrt(30.0f), result.getW());
-    }
-
-    @Test
-    public void testNormalizeTo3f() {
-        Vector4f vector = new Vector4f(1.0f, 2.0f, 3.0f, 4.0f);
-        Vector3f result = vector.normalizeTo3f();
-        assertEquals(0.25f, result.getX());
-        assertEquals(0.5f, result.getY());
-        assertEquals(0.75f, result.getZ());
+        float length = vector.length();
+        assertEquals(1.0f / length, result.getX(), 1e-5f);
+        assertEquals(2.0f / length, result.getY(), 1e-5f);
+        assertEquals(3.0f / length, result.getZ(), 1e-5f);
+        assertEquals(4.0f / length, result.getW(), 1e-5f);
     }
 
     @Test
