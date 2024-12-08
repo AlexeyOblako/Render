@@ -90,6 +90,30 @@ public class GuiController {
             exception.printStackTrace();
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //для сохраннеия модели
 @FXML
 private void saveOriginalModel() {
@@ -143,6 +167,27 @@ private void saveOriginalModel() {
             System.out.println("Error saving model: " + exception.getMessage());
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // Добавил методов для упр трнсфрц модлй
     @FXML
