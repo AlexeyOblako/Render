@@ -12,10 +12,12 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.io.IOException;
 import java.io.File;
+
 import com.cgvsu.math.Vector3f;
 
 import com.cgvsu.model.Model;
@@ -23,28 +25,30 @@ import com.cgvsu.objreader.ObjReader;
 import com.cgvsu.render_engine.Camera;
 
 public class GuiController {
-
+    private double lastMouseX = 0;
+    private double lastMouseY = 0;
+    private boolean isMousePressed = false;
     final private float TRANSLATION = 0.5F;
     final private float SCALE = 0.1F;
     final private float ROTATION = 10F;
 
     @FXML
-    AnchorPane anchorPane;
+    public AnchorPane anchorPane;
 
     @FXML
-    private Canvas canvas;
+    public Canvas canvas;
 
-    private Model mesh = null;
+    public Model mesh = null;
 
-    private Camera camera = new Camera(
+    public Camera camera = new Camera(
             new Vector3f(0, 0, 100),
             new Vector3f(0, 0, 0),
             1.0F, 1, 0.01F, 100);
 
-    private Timeline timeline;
+    public Timeline timeline;
 
     @FXML
-    private void initialize() {
+    public void initialize() {
         anchorPane.prefWidthProperty().addListener((ov, oldValue, newValue) -> canvas.setWidth(newValue.doubleValue()));
         anchorPane.prefHeightProperty().addListener((ov, oldValue, newValue) -> canvas.setHeight(newValue.doubleValue()));
 
@@ -66,8 +70,10 @@ public class GuiController {
         timeline.getKeyFrames().add(frame);
         timeline.play();
 
-        canvas.setOnMousePressed(this::handleMousePressed);
-        canvas.setOnMouseDragged(this::handleMouseDragged);
+        canvas.setOnMousePressed(event -> handleMousePressed(event));
+        canvas.setOnMouseDragged(event -> handleMouseDragged(event));
+        canvas.setOnMouseReleased(event -> handleMouseReleased(event));
+
     }
 
     @FXML
@@ -311,31 +317,35 @@ public class GuiController {
     }
 
     private void handleMousePressed(MouseEvent event) {
-        lastMouseX = event.getX();
-        lastMouseY = event.getY();
+        lastMouseX = event.getSceneX();
+        lastMouseY = event.getSceneY();
+        isMousePressed = true;
     }
 
     private void handleMouseDragged(MouseEvent event) {
-        if (mesh != null) {
-            double deltaX = event.getX() - lastMouseX;
-            double deltaY = event.getY() - lastMouseY;
+        if (isMousePressed) {
+            double deltaX = event.getSceneX() - lastMouseX;
+            double deltaY = event.getSceneY() - lastMouseY;
 
-            if (event.isPrimaryButtonDown()) {
-                Vector3f rotation = mesh.getRotation();
-                mesh.setRotation(new Vector3f(rotation.getX() - (float) (deltaY * 0.5), rotation.getY() - (float) (deltaX * 0.5), rotation.getZ()));
-            } else if (event.isMiddleButtonDown()) {
-                Vector3f scale = mesh.getScale();
-                mesh.setScale(new Vector3f(scale.getX() + (float) (deltaY * 0.01), scale.getY() + (float) (deltaY * 0.01), scale.getZ() + (float) (deltaY * 0.01)));
-            } else if (event.isSecondaryButtonDown()) {
-                Vector3f translation = mesh.getTranslation();
-                mesh.setTranslation(new Vector3f(translation.getX() - (float) (deltaX * 0.1), translation.getY() - (float) (deltaY * 0.1), translation.getZ()));
-            }
+// Обновляем вращение камеры в зависимости от движения мыши
+            updateCameraRotation(deltaX, deltaY);
 
-            lastMouseX = event.getX();
-            lastMouseY = event.getY();
+            lastMouseX = event.getSceneX();
+            lastMouseY = event.getSceneY();
         }
     }
 
-    private double lastMouseX = 0;
-    private double lastMouseY = 0;
+    private void handleMouseReleased(MouseEvent event) {
+        isMousePressed = false;
+    }
+
+    private void updateCameraRotation(double deltaX, double deltaY) {
+        float sensitivity = 0.1f; // Чувствительность мыши
+        float yaw = (float) (-deltaX * sensitivity); // Инвертируем направление вращения по горизонтали
+        float pitch = (float) (-deltaY * sensitivity);
+        float roll = (float) (deltaY * sensitivity);
+
+// Обновляем углы вращения камеры
+        camera.rotateAroundTarget(yaw, pitch, roll);
+    }
 }
