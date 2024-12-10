@@ -148,12 +148,12 @@ public class GuiController {
 
     @FXML
     public void handleCameraForward(ActionEvent actionEvent) {
-        camera.movePosition(new Vector3f(0, 0, -TRANSLATION));
+        camera.movePositionAndTarget(new Vector3f(0, 0, -TRANSLATION));
     }
 
     @FXML
     public void handleCameraBackward(ActionEvent actionEvent) {
-        camera.movePosition(new Vector3f(0, 0, TRANSLATION));
+        camera.movePositionAndTarget(new Vector3f(0, 0, TRANSLATION));
     }
 
     @FXML
@@ -316,24 +316,29 @@ public class GuiController {
     }
 
     private void handleMouseDragged(MouseEvent event) {
-        if (mesh != null) {
-            double deltaX = event.getX() - lastMouseX;
-            double deltaY = event.getY() - lastMouseY;
+        float deltaX = (float) (event.getX() - lastMouseX);
+        float deltaY = (float) (event.getY() - lastMouseY);
 
-            if (event.isPrimaryButtonDown()) {
-                Vector3f rotation = mesh.getRotation();
-                mesh.setRotation(new Vector3f(rotation.getX() - (float) (deltaY * 0.5), rotation.getY() - (float) (deltaX * 0.5), rotation.getZ()));
-            } else if (event.isMiddleButtonDown()) {
-                Vector3f scale = mesh.getScale();
-                mesh.setScale(new Vector3f(scale.getX() + (float) (deltaY * 0.01), scale.getY() + (float) (deltaY * 0.01), scale.getZ() + (float) (deltaY * 0.01)));
-            } else if (event.isSecondaryButtonDown()) {
-                Vector3f translation = mesh.getTranslation();
-                mesh.setTranslation(new Vector3f(translation.getX() - (float) (deltaX * 0.1), translation.getY() - (float) (deltaY * 0.1), translation.getZ()));
-            }
+        Vector3f position = camera.getPosition();
+        Vector3f target = camera.getTarget();
 
-            lastMouseX = event.getX();
-            lastMouseY = event.getY();
-        }
+        // Calculate the direction from the camera position to the target
+        Vector3f direction = target.deduct(position).normalize();
+
+        // Calculate the right vector
+        Vector3f right = Vector3f.crossProduct(direction, new Vector3f(0, 1, 0)).normalize();
+
+        // Calculate the up vector
+        Vector3f up = Vector3f.crossProduct(right, direction).normalize();
+
+        // Update the target based on mouse movement
+        target = Vector3f.add(target, right.multiply(deltaX * 0.01f));
+        target = Vector3f.add(target, up.multiply(deltaY * 0.01f));
+
+        camera.setTarget(target);
+
+        lastMouseX = event.getX();
+        lastMouseY = event.getY();
     }
 
     private double lastMouseX = 0;
