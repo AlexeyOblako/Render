@@ -14,7 +14,7 @@ public class ModelConverter {
         model.vertices = triPolyModel.vertices;
         model.normals = triPolyModel.normals;
         model.textureVertices = triPolyModel.textureVertices;
-        model.setName(triPolyModel.getName());
+        // model.setName(triPolyModel.getName());
         for (Triangle triangle : triPolyModel.polygons
         ) {
             model.polygons.add(triangleToPolygon(triangle));

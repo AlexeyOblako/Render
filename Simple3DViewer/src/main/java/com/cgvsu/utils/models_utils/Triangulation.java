@@ -20,7 +20,7 @@ public class Triangulation {
         triangulatedPolygonsModel.textureVertices = model.textureVertices;
         triangulatedPolygonsModel.vertices = model.vertices;
         triangulatedPolygonsModel.normals = model.normals;
-        triangulatedPolygonsModel.setName(model.getName());
+        // triangulatedPolygonsModel.setName(model.getName());
         HashMap<Polygon, ArrayList<Vector3f>> polyVertMap = new HashMap<>(getPolyVertMap(model));
         for (Map.Entry<Polygon, ArrayList<Vector3f>> entry : polyVertMap.entrySet()
         ) {
