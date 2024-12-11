@@ -2,6 +2,7 @@ package com.cgvsu.math.matrix;
 
 import com.cgvsu.math.Vector4f;
 
+import javax.vecmath.Vector3f;
 import java.util.Arrays;
 
 public class Matrix4f{
@@ -9,7 +10,7 @@ public class Matrix4f{
 
     public Matrix4f (float[][] data) {
         if (data.length != 4 || data[0].length != 4) {
-            throw new IllegalArgumentException("Matrix should be 3x3");
+            throw new IllegalArgumentException("Матрица должна быть размерностью 4на4");
         }
         this.matrix = data;
     }
@@ -24,6 +25,9 @@ public class Matrix4f{
                 };
     }
 
+
+
+
     public float[][] getMatrix() {
         return matrix;
     }
@@ -36,10 +40,10 @@ public class Matrix4f{
         return matrix[i][j];
     }
 
-    //Сложение матриц
+    //сложение
     public Matrix4f add(Matrix4f other){
         if (other == null) {
-            throw new NullPointerException("Matrix can't be null");
+            throw new NullPointerException("Матрица не может быть нулевая");
         }
         float [][] result = new float[4][4];
         for (int i = 0; i < 4; i++){
@@ -50,10 +54,10 @@ public class Matrix4f{
         return new Matrix4f(result);
     }
 
-    //Вычитание матриц
+    //вычитание
     public Matrix4f deduct(Matrix4f other){
         if (other == null) {
-            throw new NullPointerException("Matrix can't be null");
+            throw new NullPointerException("Матрица не может быть нулевая");
         }
         float [][] result = new float[4][4];
         for (int i = 0; i < 4; i++){
@@ -64,10 +68,10 @@ public class Matrix4f{
         return new Matrix4f(result);
     }
 
-    //Умножение на вектор
+    //умножение на вектор
     public Vector4f multiply(Vector4f vector){
         if (vector == null) {
-            throw new NullPointerException("Vector can't be null");
+            throw new NullPointerException("Вектор не может быть нулевой");
         }
         float[] result = new float[4];
         for (int i = 0; i < 4; i++){
@@ -81,10 +85,10 @@ public class Matrix4f{
 
     public static Vector4f multiply(Matrix4f matrix4f, Vector4f vector4f) {
         if (vector4f == null) {
-            throw new NullPointerException("Vector can't be null");
+            throw new NullPointerException("Вектор не может быть нулевой");
         }
         if (matrix4f == null) {
-            throw new NullPointerException("Matrix can't be null");
+            throw new NullPointerException("Вектор не может быть нулевой");
         }
         float[] result = new float[4];
         for (int i = 0; i < 4; i++) {
@@ -95,10 +99,10 @@ public class Matrix4f{
         }
         return new Vector4f(result);
     }
-    //Умножение на матрицу
+    // умножение на матрицу
     public Matrix4f multiply(Matrix4f other) {
         if (other == null) {
-            throw new NullPointerException("Matrix can't be null");
+            throw new NullPointerException("Матрица не может быть нулевая");
         }
         float [][] result = new float[4][4];
         for (int i = 0; i < 4; i++){
@@ -114,7 +118,7 @@ public class Matrix4f{
 
     public static Matrix4f multiply(Matrix4f first, Matrix4f second) {
         if (first == null || second == null) {
-            throw new NullPointerException("Matrix can't be null");
+            throw new NullPointerException("Матрица не может быть нулевая");
         }
         float[][] result = new float[4][4];
         for (int i = 0; i < 4; i++) {
@@ -128,7 +132,7 @@ public class Matrix4f{
         return new Matrix4f(result);
     }
 
-    // Транспонирование
+    // транспонирование
     public Matrix4f transpose(){
         float [][] result = new float[4][4];
         for (int i = 0; i < 4; i++){
@@ -139,7 +143,7 @@ public class Matrix4f{
         return new Matrix4f(result);
     }
 
-    // Быстрое задание единичной матрицы
+    // единичная
     public static Matrix4f unit(){
         float[][] unitMatrix = new float[][]{
                 {1, 0, 0, 0},
@@ -149,7 +153,7 @@ public class Matrix4f{
         };
         return new Matrix4f(unitMatrix);
     }
-    //Вычисление детерминанта
+    //нахождение детерминанта
     public float determinate(){
         float[][] data1 = new float[3][3];
         float[][] data2 = new float[3][3];
@@ -192,7 +196,7 @@ public class Matrix4f{
     public Matrix4f inverse(){
         float det = this.determinate();
         if (det == 0){
-            throw new NullPointerException("There is no inverse matrix, since the determinant is zero");
+            throw new NullPointerException("Обратной матрицы не существует, определитель равен ноль");
         }
         float[][] matrix = this.minor().getMatrix();
 

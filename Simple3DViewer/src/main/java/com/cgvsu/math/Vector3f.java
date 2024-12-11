@@ -1,8 +1,12 @@
 package com.cgvsu.math;
 
+// Это заготовка для собственной библиотеки для работы с линейной алгеброй
 public class Vector3f {
-    // TODO: 26.11.2024 сделать приватными переменные
-    public float x, y, z;
+
+    private float x;
+    private float y;
+    private float z;
+
     public Vector3f(float x, float y, float z) {
         this.x = x;
         this.y = y;
@@ -11,7 +15,7 @@ public class Vector3f {
 
     public Vector3f(float[] points) {
         if (points.length != 3) {
-            throw new IllegalArgumentException("Vector should have 3 points");
+            throw new IllegalArgumentException("Вектор должен быть размерности 3");
         }
         this.x = points[0];
         this.y = points[1];
@@ -41,7 +45,19 @@ public class Vector3f {
             case 1: return y;
             case 2: return z;
         }
-        throw new IllegalArgumentException("Index out of bounds");
+        throw new IllegalArgumentException("Недопустимо, индекс выходит за пределы допустимого");
+    }
+
+    public void setX(float x) {
+        this.x = x;
+    }
+
+    public void setY(float y) {
+        this.y = y;
+    }
+
+    public void setZ(float z) {
+        this.z = z;
     }
 
     public void add(Vector3f other){
@@ -53,12 +69,12 @@ public class Vector3f {
     public static Vector3f add(Vector3f first, Vector3f second) {
         return new Vector3f(
                 first.x + second.x,
-                first.y + second.x,
+                first.y + second.y,
                 first.z + second.z
         );
     }
 
-    //Вычитание векторов
+    //вычитание
     public Vector3f deduct(Vector3f other){
         return new Vector3f(
                 this.x - other.x,
@@ -75,7 +91,7 @@ public class Vector3f {
         );
     }
 
-    //Умножение на скаляр
+    //умножение на скаляр
     public Vector3f multiply(float scalar){
         return new Vector3f(
                 this.x * scalar,
@@ -83,10 +99,10 @@ public class Vector3f {
                 this.z * scalar
         );
     }
-    //Деление на скаляр
+    //деление на скаляр
     public Vector3f divide(float scalar){
         if (scalar == 0){
-            throw new ArithmeticException("Dividing by zero is undefined and not allowed");
+            throw new ArithmeticException("Недопустимо, деление на ноль");
         }
         return new Vector3f(
                 this.x/scalar,
@@ -94,11 +110,11 @@ public class Vector3f {
                 this.z/scalar
         );
     }
-    //Вычисление длины вектора
+    //вычисление длины
     public float length(){
         return (float) Math.sqrt(x*x + y*y + z*z);
     }
-    //Нормализация вектора
+    //нормализация
     public Vector3f normalize() {
         float normalization = length() > 0 ? 1 / length() : 0;
         return new Vector3f(
@@ -108,11 +124,11 @@ public class Vector3f {
         );
     }
 
-    //Скалярное произведение векторов
+    //скалярное произведение
     public float dot(Vector3f other){
         return this.x * other.x + this.y * other.y + this.z * other.z;
     }
-    // Векторное произведение векторов
+    // векторное произведение
     public Vector3f crossProduct(Vector3f other) {
         return new Vector3f(
                 this.y * other.z - this.z * other.y,

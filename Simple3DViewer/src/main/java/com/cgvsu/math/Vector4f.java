@@ -15,7 +15,7 @@ public class Vector4f {
 
     public Vector4f(float[] points) {
         if (points.length != 4) {
-            throw new IllegalArgumentException("Vector should have 4 points");
+            throw new IllegalArgumentException("Вектор должен быть размерности 4");
         }
         this.x = points[0];
         this.y = points[1];
@@ -51,9 +51,9 @@ public class Vector4f {
             case 2: return z;
             case 3: return w;
         }
-        throw new IllegalArgumentException("Индекс выходит за границы");
+        throw new IllegalArgumentException("Недопустимо, индекс выходит за пределы допустимого");
     }
-    // Сложение векторов
+    // сложение
     public Vector4f add(Vector4f other) {
         return new Vector4f(this.x + other.x, this.y + other.y, this.z + other.z, this.w + other.w);
     }
@@ -67,7 +67,7 @@ public class Vector4f {
         );
     }
 
-    // Вычитание векторов
+    // вычитание
     public Vector4f deduct(Vector4f other) {
         return new Vector4f(this.x - other.x, this.y - other.y, this.z - other.z, this.w - other.w);
     }
@@ -81,23 +81,23 @@ public class Vector4f {
         );
     }
 
-    // Умножение на скаляр
+    // умножение на скаляр
     public Vector4f multiply(float scalar) {
         return new Vector4f(this.x * scalar, this.y * scalar, this.z * scalar, this.w * scalar);
     }
 
-    // Деление на скаляр
+    // деление на скаляр
     public Vector4f divide(float scalar){
         if (scalar == 0){
-            throw new ArithmeticException("Dividing by zero is undefined and not allowed");
+            throw new ArithmeticException("Недопустимо, деление на ноль");
         }
         return (new Vector4f(this.x/scalar, this.y/scalar, this.z/scalar, this.w/scalar));
     }
-    //Вычисление длины вектора
+    //вычисление длины
     public float length(){
         return (float) Math.sqrt(x*x + y*y + z*z + w*w);
     }
-    //Нормализация вектора
+    //нормализация
     public Vector4f normalize(){
         float normalization = length() != 0 ? 1 / length() : 0;
         return new Vector4f(
@@ -115,7 +115,7 @@ public class Vector4f {
                 this.z / this.w
         );
     }
-    //Скалярное произведение векторов
+    // скалярное произведение
     public float dot(Vector4f other){
         return this.x * other.x + this.y * other.y + this.z * other.z + this.w * other.w;
     }

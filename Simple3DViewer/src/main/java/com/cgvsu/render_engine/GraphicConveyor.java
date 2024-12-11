@@ -114,7 +114,6 @@ public class GraphicConveyor {
             final float nearPlane,
             final float farPlane) {
         Matrix4f result = new Matrix4f();
-        // Господи, за что ты так со мной, зачем нам нужен этот 0.5F ???
         float tangentMinusOnDegree = (float) (1.0F / (Math.tan(fov * 0.5F)));
         result.setValue(0,0,tangentMinusOnDegree);
         result.setValue(1,1,tangentMinusOnDegree / aspectRatio);
