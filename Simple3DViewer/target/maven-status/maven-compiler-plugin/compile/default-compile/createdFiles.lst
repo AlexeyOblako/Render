@@ -1,0 +1,15 @@
+com\cgvsu\math\Vector3f.class
+com\cgvsu\math\Vector4f.class
+com\cgvsu\objreader\ObjReaderException.class
+com\cgvsu\render_engine\Camera.class
+com\cgvsu\model\Model.class
+com\cgvsu\objreader\ObjReader.class
+com\cgvsu\render_engine\RenderEngine.class
+com\cgvsu\render_engine\GraphicConveyor.class
+module-info.class
+com\cgvsu\model\Triangle.class
+com\cgvsu\model\Polygon.class
+com\cgvsu\Main.class
+com\cgvsu\math\Vector2f.class
+com\cgvsu\math\matrix\Matrix3f.class
+com\cgvsu\math\matrix\Matrix4f.class
