@@ -50,15 +50,15 @@ public class Triangulation {
 
     public static List<List<Vector3f>> triangulate(List<Vector3f> vertList) {
         List<List<Vector3f>> triangulatedPolygons = new ArrayList<>();
-        if (vertList.size() < 3){
+        if (vertList.size() < 3) {
             triangulatedPolygons.add(vertList);
             return triangulatedPolygons;
         }
-        for(int i = 1; i < vertList.size()-1; i++){
+        for (int i = 1; i < vertList.size() - 1; i++) {
             List<Vector3f> triangle = new ArrayList<>();
             triangle.add(vertList.get(0));
             triangle.add(vertList.get(i));
-            triangle.add(vertList.get(i+1));
+            triangle.add(vertList.get(i + 1));
             triangulatedPolygons.add(triangle);
         }
         return triangulatedPolygons;

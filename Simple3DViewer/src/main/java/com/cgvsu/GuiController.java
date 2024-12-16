@@ -60,7 +60,7 @@ public class GuiController {
 
             if (mesh != null) {
                 boolean isActive = mesh != null && !mesh.polygons.isEmpty();
-                RenderEngine.render(canvas.getGraphicsContext2D(), camera, mesh, (int) width, (int) height, isActive);
+                RenderEngine.render(canvas.getGraphicsContext2D(), camera, mesh, (int) width, (int) height);
             }
         });
 
