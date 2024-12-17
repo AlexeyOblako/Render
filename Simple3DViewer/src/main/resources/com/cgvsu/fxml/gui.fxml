@@ -138,6 +138,10 @@
                     <KeyCodeCombination alt="UP" control="DOWN" meta="UP" shift="UP" shortcut="UP" code="N"/>
                 </accelerator>
             </MenuItem>
+            <MenuItem mnemonicParsing="false" onAction="#handleTriangulate" text="Включить триангуляцию"/>
+            <MenuItem mnemonicParsing="false" onAction="#handleDisableTriangulate" text="Отключить триангуляцию"/>
+            <MenuItem mnemonicParsing="false" onAction="#handleEnableRasterization" text="Включить растеризацию"/>
+            <MenuItem mnemonicParsing="false" onAction="#handleDisableRasterization" text="Отключить растеризацию"/>
         </Menu>
     </MenuBar>
 

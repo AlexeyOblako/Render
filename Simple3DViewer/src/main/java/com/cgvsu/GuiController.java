@@ -1,6 +1,7 @@
 package com.cgvsu;
 
 import com.cgvsu.render_engine.RenderEngine;
+import com.cgvsu.utils.models_utils.Triangulation;
 import javafx.fxml.FXML;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -34,6 +35,8 @@ public class GuiController {
     @FXML
     private Canvas canvas;
 
+    private boolean isTriangulationEnabled = false;
+
     private Model mesh = null;
 
     private Camera camera = new Camera(
@@ -42,6 +45,7 @@ public class GuiController {
             1.0F, 1, 0.01F, 100);
 
     private Timeline timeline;
+
 
     @FXML
     private void initialize() {
@@ -59,17 +63,22 @@ public class GuiController {
             camera.setAspectRatio((float) (width / height));
 
             if (mesh != null) {
-                boolean isActive = mesh != null && !mesh.polygons.isEmpty();
-                RenderEngine.render(canvas.getGraphicsContext2D(), camera, mesh, (int) width, (int) height);
+                if (isTriangulationEnabled) {
+                    // Используем триангулированную модель
+                    RenderEngine.render(canvas.getGraphicsContext2D(), camera, Triangulation.getTriangulatedModel(mesh), (int) width, (int) height);
+                } else {
+                    // Используем оригинальную модель
+                    RenderEngine.render(canvas.getGraphicsContext2D(), camera, mesh, (int) width, (int) height);
+                }
             }
         });
 
         timeline.getKeyFrames().add(frame);
         timeline.play();
-
-        canvas.setOnMousePressed(this::handleMousePressed);
-        canvas.setOnMouseDragged(this::handleMouseDragged);
     }
+
+
+    private Model originalMesh = null; // Оригинальная модель
 
     @FXML
     private void onOpenModelMenuItemClick() {
@@ -86,12 +95,13 @@ public class GuiController {
 
         try {
             String fileContent = Files.readString(fileName);
-            mesh = ObjReader.read(fileContent);
+            mesh = ObjReader.read(fileContent); // Загружаем модель
+            originalMesh = ObjReader.read(fileContent); // Сохраняем оригинальную модель
 
             mesh.resetTransformations();
 
         } catch (IOException exception) {
-
+            // Обработка ошибок
         }
     }
 
@@ -309,6 +319,41 @@ public class GuiController {
             Vector3f translation = mesh.getTranslation();
             mesh.setTranslation(new Vector3f(translation.getX(), translation.getY(), translation.getZ() - TRANSLATION));
         }
+    }
+
+
+
+    private boolean isTriangulationApplied = false; // Флаг для проверки, была ли уже применена триангуляция
+
+    @FXML
+    private void handleTriangulate(ActionEvent event) {
+        if (!isTriangulationApplied) { // Проверяем, была ли уже применена триангуляция
+            isTriangulationEnabled = true;
+            System.out.println("Триангуляция включена");
+            if (mesh != null) {
+                mesh = Triangulation.getTriangulatedModel(mesh); // Вызываем триангуляцию только один раз
+                isTriangulationApplied = true; // Устанавливаем флаг
+                timeline.playFromStart(); // Перерисовываем сцену
+            }
+        } else {
+            System.out.println("Триангуляция уже была применена");
+        }
+    }
+
+    @FXML
+    private void handleDisableTriangulate(ActionEvent event) {
+        isTriangulationEnabled = false;
+        isTriangulationApplied = false; // Сбрасываем флаг
+        System.out.println("Триангуляция отключена");
+        if (mesh != null) {
+            mesh = originalMesh; // Возвращаем оригинальную модель
+            timeline.playFromStart(); // Перерисовываем сцену
+        }
+    }
+
+    private Model loadOriginalModel() {
+        // Возвращаем сохранённую оригинальную модель
+        return mesh;
     }
 
     private void handleMousePressed(MouseEvent event) {
