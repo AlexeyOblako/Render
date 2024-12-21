@@ -114,6 +114,11 @@ public class Vector3f {
     public float length(){
         return (float) Math.sqrt(x*x + y*y + z*z);
     }
+
+
+
+
+
     //нормализация
     public Vector3f normalize() {
         float normalization = length() > 0 ? 1 / length() : 0;
@@ -128,6 +133,10 @@ public class Vector3f {
     public float dot(Vector3f other){
         return this.x * other.x + this.y * other.y + this.z * other.z;
     }
+
+
+
+
     // векторное произведение
     public Vector3f crossProduct(Vector3f other) {
         return new Vector3f(
