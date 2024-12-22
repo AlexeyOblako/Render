@@ -350,11 +350,10 @@ public class GuiController {
     }
 
     private void updateCameraRotation(double deltaX, double deltaY) {
-        float sensitivity = 0.1f; // Чувствительность мыши
-        float yaw = (float) (-deltaX * sensitivity); // Инвертируем направление вращения по горизонтали
+        float sensitivity = 0.1f;//сенса
+        float yaw = (float) (-deltaX * sensitivity);
         float pitch = (float) (-deltaY * sensitivity);
 
-        // Обновляем углы вращения камеры
         camera.rotateAroundTarget(yaw, pitch);
     }
 }

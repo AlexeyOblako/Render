@@ -80,17 +80,8 @@ public class GraphicConveyor {
                 translationMatrix4f(translationX, translationY, translationZ),
                 Matrix4f.multiply(rotateMatrix4f(angleX, angleY, angleZ), scaleMatrix4f(scaleX, scaleY, scaleZ))
         );
-
-//        return Matrix4f.multiply(
-//                Matrix4f.multiply(scaleMatrix4f(scaleX, scaleY, scaleZ), rotateMatrix4f(angleX, angleY, angleZ)),
-//                translationMatrix4f(translationX, translationY, translationZ)
-//        );
     }
 
-
-    public static Matrix4f rotateScaleTranslate() {
-        return rotateScaleTranslate(1,1,1,0,0,0,0,0,0);
-    }
 
     public static Matrix4f lookAt(Vector3f eye, Vector3f target) {
         return lookAt(eye, target, new Vector3f(0F, 1.0F, 0F));
@@ -115,6 +106,7 @@ public class GraphicConveyor {
         return new Matrix4f(matrix);
     }
 
+
     public static Matrix4f perspective(
             final float fov,
             final float aspectRatio,
@@ -124,29 +116,18 @@ public class GraphicConveyor {
         float tangent = (float) (1.0F / (Math.tan(fov * 0.5F)));
         result.setValue(0, 0, tangent / aspectRatio);
         result.setValue(1, 1, tangent);
-        result.setValue(2, 2, (farPlane + nearPlane) / (nearPlane - farPlane));
-        result.setValue(2, 3, (2 * nearPlane * farPlane) / (nearPlane - farPlane));
-        result.setValue(3, 2, -1.0F);
+        result.setValue(2, 2, (farPlane + nearPlane) / (farPlane - nearPlane));
+        result.setValue(2, 3, 2 * (nearPlane * farPlane) / (farPlane - nearPlane));
+        result.setValue(3, 2, 1.0F);
         result.setValue(3, 3, 0.0F);
         return result;
     }
-    /*public static Matrix4f perspective(
-            final float fov,
-            final float aspectRatio,
-            final float nearPlane,
-            final float farPlane) {
-        Matrix4f result = new Matrix4f();
-        float tangentMinusOnDegree = (float) (1.0F / (Math.tan(fov * 0.5F)));
-        result.setValue(0,0,tangentMinusOnDegree);
-        result.setValue(1,1,tangentMinusOnDegree / aspectRatio);
-        result.setValue(2,2,(farPlane + nearPlane) / (farPlane - nearPlane));
-        result.setValue(2,3,2 * (nearPlane * farPlane) / (nearPlane - farPlane));
-        result.setValue(3,2,1.0F);
-        return result;
-    }*/
 
     public static Point2f vertexToPoint(final Vector3f vertex, final int width, final int height) {
-        return new Point2f(vertex.getX() * width + width / 2.0F, vertex.getY() * height + height / 2.0F);
+        return new Point2f(vertex.getX() * width + width / 2.0F, -vertex.getY() * height + height / 2.0F);
     }
+
+
+
 
 }

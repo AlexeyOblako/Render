@@ -68,7 +68,7 @@ public class Camera {
     }
 
     public void rotateAroundTarget(float yaw, float pitch) {
-        // Вращение вокруг оси Y (yaw)
+        //вращение вокруг Y
         Vector3f direction = target.deduct(position);
         float yawRad = (float) Math.toRadians(yaw);
         float cosYaw = (float) Math.cos(yawRad);
@@ -78,7 +78,7 @@ public class Camera {
         direction.setX(newX);
         direction.setZ(newZ);
 
-        // Вращение вокруг оси X (pitch)
+        //вокруг X
         float pitchRad = (float) Math.toRadians(pitch);
         float cosPitch = (float) Math.cos(pitchRad);
         float sinPitch = (float) Math.sin(pitchRad);
@@ -87,7 +87,7 @@ public class Camera {
         direction.setY(newY);
         direction.setZ(newZ2);
 
-        // Обновляем позицию камеры
+        //обновляем позицию
         position = target.deduct(direction);
     }
 }

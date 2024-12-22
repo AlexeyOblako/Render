@@ -11,7 +11,6 @@ public class Model {
     public ArrayList<Vector3f> normals = new ArrayList<Vector3f>();
     public ArrayList<Polygon> polygons = new ArrayList<Polygon>();
 
-    // параметры для трансформации
     private Vector3f scale = new Vector3f(1, 1, 1);
     private Vector3f rotation = new Vector3f(0, 0, 0);
     private Vector3f translation = new Vector3f(0, 0, 0);
