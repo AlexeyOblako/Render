@@ -1,117 +1,61 @@
 package com.cgvsu.math;
 
-// Это заготовка для собственной библиотеки для работы с линейной алгеброй
-public class Vector2f {
-    private float x;
-    private float y;
-
+public class Vector2f extends Vector {
     public Vector2f(float x, float y) {
-        this.x = x;
-        this.y = y;
+        super(new float[]{x, y});
     }
+
     public Vector2f(float[] points) {
+        super(points);
         if (points.length != 2) {
-            throw new IllegalArgumentException("Вектор должен быть размерности 2 ");
+            throw new IllegalArgumentException("Вектор должен быть размерности 2");
         }
-        this.x = points[0];
-        this.y = points[1];
     }
 
-    public Vector2f () {
-        this.x = 0;
-        this.y = 0;
+    public float getX() {
+        return components[0];
     }
 
-    public float getX () {
-        return x;
+    public float getY() {
+        return components[1];
     }
 
-    public float getY () {
-        return y;
+    @Override
+    public float length() {
+        return (float) Math.sqrt(components[0] * components[0] + components[1] * components[1]);
     }
 
-    public float get(int index){
-        switch (index){
-            case 0: return x;
-            case 1: return y;
-        }
-        throw new IllegalArgumentException("Недопустимо, индекс выходит за пределы допустимого");
+    @Override
+    public Vector2f normalize() {
+        float len = length();
+        return new Vector2f(components[0] / len, components[1] / len);
     }
 
-    //сложение
-    public Vector2f add(Vector2f other){
-        return(new Vector2f(this.x + other.x, this.y + other.y));
+    @Override
+    public Vector2f add(Vector other) {
+        return new Vector2f(components[0] + other.get(0), components[1] + other.get(1));
     }
 
-    public static Vector2f add(Vector2f first, Vector2f second) {
-        return new Vector2f(
-                first.x + second.x,
-                first.y + second.y
-        );
+    @Override
+    public Vector2f deduct(Vector other) {
+        return new Vector2f(components[0] - other.get(0), components[1] - other.get(1));
     }
 
-    //вычитание
-    public Vector2f deduct(Vector2f other){
-        return(new Vector2f(this.x - other.x, this.y - other.y));
+    @Override
+    protected Vector2f createInstance(float[] components) {
+        return new Vector2f(components);
     }
 
-    public static Vector2f deduct(Vector2f first, Vector2f second) {
-        return new Vector2f(
-                first.x - second.x,
-                first.y - second.y
-        );
-    }
-
-
-    //умножение
-    public Vector2f multiply(float scalar){
-        return(new Vector2f(this.x * scalar, this.y * scalar));
-    }
-
-    //деление на скаляр
-    public Vector2f divide(float scalar){
-        if (scalar == 0){
-            throw new ArithmeticException("Недопустимо, деление на ноль");
-        }
-        return (new Vector2f(this.x/scalar, this.y/scalar));
-    }
-
-    //подсчет длины
-    public float length(){
-        return (float) Math.sqrt(x*x + y*y);
-    }
-
-    //нормализация
-    public Vector2f normalize(){
-        float normalization = length() != 0 ? 1 / length() : 0;
-        return new Vector2f(
-                this.x * normalization,
-                this.y * normalization
-        );
-    }
-
-    //скалярное произведение
-    public float dot(Vector2f other){
-        return this.x * other.x + this.y * other.y;
-    }
-
-    public boolean equals(Vector2f vector2f) {
-        return Math.abs(this.x - vector2f.x) <= 10e-6 &&
-                Math.abs(this.y - vector2f.y) <= 10e-6;
-    }
-
-    public String toString() {
-        return "Vector2f: x = " + this.x + ", y = " + this.y;
-    }
-    public Vector2f to(Vector2f end) {
-        return new Vector2f(end.x - x, end.y - y);
-    }
-    public void set(float x, float y) {
-        this.x = x;
-        this.y = y;
-    }
     public float crossMagnitude(Vector2f other) {
-        return this.x * other.y - this.y * other.x;
+        return this.components[0] * other.components[1] - this.components[1] * other.components[0];
     }
 
+    public Vector2f to(Vector2f end) {
+        return new Vector2f(end.getX() - components[0], end.getY() - components[1]);
+    }
+
+    public void set(float x, float y) {
+        components[0] = x;
+        components[1] = y;
+    }
 }

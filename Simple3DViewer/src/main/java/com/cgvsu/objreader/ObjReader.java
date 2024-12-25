@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 public class ObjReader {
-
 	private static final String OBJ_VERTEX_TOKEN = "v";
 	private static final String OBJ_TEXTURE_TOKEN = "vt";
 	private static final String OBJ_NORMAL_TOKEN = "vn";
@@ -23,7 +22,7 @@ public class ObjReader {
 		Scanner scanner = new Scanner(fileContent);
 		while (scanner.hasNextLine()) {
 			final String line = scanner.nextLine();
-			ArrayList<String> wordsInLine = new ArrayList<String>(Arrays.asList(line.split("\\s+")));
+			ArrayList<String> wordsInLine = new ArrayList<>(Arrays.asList(line.split("\\s+")));
 			if (wordsInLine.isEmpty()) {
 				continue;
 			}
@@ -33,16 +32,6 @@ public class ObjReader {
 
 			++lineInd;
 			switch (token) {
-				// Для структур типа вершин методы написаны так, чтобы ничего не знать о внешней среде.
-				// Они принимают только то, что им нужно для работы, а возвращают только то, что могут создать.
-				// Исключение - индекс строки. Он прокидывается, чтобы выводить сообщение об ошибке.
-				// Могло быть иначе. Например, метод parseVertex мог вместо возвращения вершины принимать вектор вершин
-				// модели или сам класс модели, работать с ним.
-				// Но такой подход может привести к большему количеству ошибок в коде. Например, в нем что-то может
-				// тайно сделаться с классом модели.
-				// А еще это портит читаемость
-				// И не стоит забывать про тесты. Чем проще вам задать данные для теста, проверить, что метод рабочий,
-				// тем лучше.
 				case OBJ_VERTEX_TOKEN -> result.vertices.add(parseVertex(wordsInLine, lineInd));
 				case OBJ_TEXTURE_TOKEN -> result.textureVertices.add(parseTextureVertex(wordsInLine, lineInd));
 				case OBJ_NORMAL_TOKEN -> result.normals.add(parseNormal(wordsInLine, lineInd));
@@ -54,18 +43,15 @@ public class ObjReader {
 		return result;
 	}
 
-	// Всем методам кроме основного я поставил модификатор доступа protected, чтобы обращаться к ним в тестах
 	protected static Vector3f parseVertex(final ArrayList<String> wordsInLineWithoutToken, int lineInd) {
 		try {
 			return new Vector3f(
 					Float.parseFloat(wordsInLineWithoutToken.get(0)),
 					Float.parseFloat(wordsInLineWithoutToken.get(1)),
 					Float.parseFloat(wordsInLineWithoutToken.get(2)));
-
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			throw new ObjReaderException("Failed to parse float value.", lineInd);
-
-		} catch(IndexOutOfBoundsException e) {
+		} catch (IndexOutOfBoundsException e) {
 			throw new ObjReaderException("Too few vertex arguments.", lineInd);
 		}
 	}
@@ -75,11 +61,9 @@ public class ObjReader {
 			return new Vector2f(
 					Float.parseFloat(wordsInLineWithoutToken.get(0)),
 					Float.parseFloat(wordsInLineWithoutToken.get(1)));
-
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			throw new ObjReaderException("Failed to parse float value.", lineInd);
-
-		} catch(IndexOutOfBoundsException e) {
+		} catch (IndexOutOfBoundsException e) {
 			throw new ObjReaderException("Too few texture vertex arguments.", lineInd);
 		}
 	}
@@ -90,19 +74,17 @@ public class ObjReader {
 					Float.parseFloat(wordsInLineWithoutToken.get(0)),
 					Float.parseFloat(wordsInLineWithoutToken.get(1)),
 					Float.parseFloat(wordsInLineWithoutToken.get(2)));
-
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			throw new ObjReaderException("Failed to parse float value.", lineInd);
-
-		} catch(IndexOutOfBoundsException e) {
+		} catch (IndexOutOfBoundsException e) {
 			throw new ObjReaderException("Too few normal arguments.", lineInd);
 		}
 	}
 
 	protected static Polygon parseFace(final ArrayList<String> wordsInLineWithoutToken, int lineInd) {
-		ArrayList<Integer> onePolygonVertexIndices = new ArrayList<Integer>();
-		ArrayList<Integer> onePolygonTextureVertexIndices = new ArrayList<Integer>();
-		ArrayList<Integer> onePolygonNormalIndices = new ArrayList<Integer>();
+		ArrayList<Integer> onePolygonVertexIndices = new ArrayList<>();
+		ArrayList<Integer> onePolygonTextureVertexIndices = new ArrayList<>();
+		ArrayList<Integer> onePolygonNormalIndices = new ArrayList<>();
 
 		for (String s : wordsInLineWithoutToken) {
 			parseFaceWord(s, onePolygonVertexIndices, onePolygonTextureVertexIndices, onePolygonNormalIndices, lineInd);
@@ -115,9 +97,6 @@ public class ObjReader {
 		return result;
 	}
 
-	// Обратите внимание, что для чтения полигонов я выделил еще один вспомогательный метод.
-	// Это бывает очень полезно и с точки зрения структурирования алгоритма в голове, и с точки зрения тестирования.
-	// В радикальных случаях не бойтесь выносить в отдельные методы и тестировать код из одной-двух строчек.
 	protected static void parseFaceWord(
 			String wordInLine,
 			ArrayList<Integer> onePolygonVertexIndices,
@@ -145,11 +124,9 @@ public class ObjReader {
 					throw new ObjReaderException("Invalid element size.", lineInd);
 				}
 			}
-
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			throw new ObjReaderException("Failed to parse int value.", lineInd);
-
-		} catch(IndexOutOfBoundsException e) {
+		} catch (IndexOutOfBoundsException e) {
 			throw new ObjReaderException("Too few arguments.", lineInd);
 		}
 	}

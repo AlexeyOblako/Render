@@ -10,8 +10,8 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.nio.file.Files;
@@ -20,10 +20,10 @@ import java.io.IOException;
 import java.io.File;
 
 import com.cgvsu.math.Vector3f;
-
 import com.cgvsu.model.Model;
 import com.cgvsu.objreader.ObjReader;
 import com.cgvsu.render_engine.Camera;
+import com.cgvsu.ObjWriter;
 
 public class GuiController {
     private double lastMouseX = 0;
@@ -96,9 +96,8 @@ public class GuiController {
             mesh = ObjReader.read(fileContent);
 
             mesh.resetTransformations();
-
         } catch (IOException exception) {
-
+            // Handle exception
         }
     }
 
@@ -120,18 +119,16 @@ public class GuiController {
         Path fileName = Path.of(file.getAbsolutePath());
 
         try {
-
             String originalModelContent = ObjWriter.write(mesh, false);
             Files.writeString(fileName, originalModelContent);
         } catch (IOException exception) {
-
+            // Handle exception
         }
     }
 
     @FXML
     private void onSaveTransformedModelMenuItemClick() {
         if (mesh == null) {
-
             return;
         }
         FileChooser fileChooser = new FileChooser();
@@ -146,11 +143,10 @@ public class GuiController {
         Path fileName = Path.of(file.getAbsolutePath());
 
         try {
-
             String transformedModelContent = ObjWriter.write(mesh);
             Files.writeString(fileName, transformedModelContent);
         } catch (IOException exception) {
-
+            // Handle exception
         }
     }
 
@@ -320,6 +316,12 @@ public class GuiController {
         }
     }
 
+    private void handleMouseScroll(ScrollEvent event) {
+        double deltaY = event.getDeltaY();
+        Vector3f direction = camera.getTarget().deduct(camera.getPosition()).normalize();
+        camera.movePosition(direction.multiply((float) (deltaY * ZOOM_SENSITIVITY)));
+    }
+
     private void handleMousePressed(MouseEvent event) {
         lastMouseX = event.getSceneX();
         lastMouseY = event.getSceneY();
@@ -331,7 +333,6 @@ public class GuiController {
             double deltaX = event.getSceneX() - lastMouseX;
             double deltaY = event.getSceneY() - lastMouseY;
 
-            // Обновляем вращение камеры в зависимости от движения мыши
             updateCameraRotation(deltaX, deltaY);
 
             lastMouseX = event.getSceneX();
@@ -343,17 +344,11 @@ public class GuiController {
         isMousePressed = false;
     }
 
-    private void handleMouseScroll(ScrollEvent event) {
-        double deltaY = event.getDeltaY();
-        Vector3f direction = camera.getTarget().deduct(camera.getPosition()).normalize();
-        camera.movePosition(direction.multiply((float) (deltaY * ZOOM_SENSITIVITY)));
-    }
-
     private void updateCameraRotation(double deltaX, double deltaY) {
-        float sensitivity = 0.1f;//сенса
+        float sensitivity = 0.1f;
         float yaw = (float) (-deltaX * sensitivity);
         float pitch = (float) (-deltaY * sensitivity);
 
-        camera.rotateAroundTarget(yaw, pitch);
+        camera.rotateAroundPosition(yaw, pitch);
     }
 }
