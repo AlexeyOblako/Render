@@ -17,7 +17,6 @@ public abstract class Vector {
 
     public abstract float length();
     public abstract Vector normalize();
-
     public abstract Vector add(Vector other);
     public abstract Vector deduct(Vector other);
 

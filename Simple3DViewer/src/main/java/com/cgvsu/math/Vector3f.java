@@ -50,11 +50,6 @@ public class Vector3f extends Vector {
     }
 
     @Override
-    public Vector3f multiply(float scalar) {
-        return new Vector3f(components[0] * scalar, components[1] * scalar, components[2] * scalar);
-    }
-
-    @Override
     protected Vector3f createInstance(float[] components) {
         return new Vector3f(components);
     }
@@ -103,5 +98,13 @@ public class Vector3f extends Vector {
 
     public static Vector2f vertex3fToVector2f(final Vector3f vertex, final int width, final int height) {
         return new Vector2f(vertex.getX() * width + width / 2.0F, -vertex.getY() * height + height / 2.0F);
+    }
+
+    public Vector3f multiply(float scalar) {
+        return new Vector3f(
+                components[0] * scalar,
+                components[1] * scalar,
+                components[2] * scalar
+        );
     }
 }
