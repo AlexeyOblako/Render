@@ -54,11 +54,19 @@ public class Vector4f extends Vector {
         return new Vector4f(components);
     }
 
-    public Vector3f normalizeTo3f() {
+    public Vector3f crossProduct(Vector4f other) {
         return new Vector3f(
-                components[0] / components[3],
-                components[1] / components[3],
-                components[2] / components[3]
+                components[1] * other.components[2] - components[2] * other.components[1],
+                components[2] * other.components[0] - components[0] * other.components[2],
+                components[0] * other.components[1] - components[1] * other.components[0]
+        );
+    }
+
+    public static Vector3f crossProduct(Vector4f first, Vector4f second) {
+        return new Vector3f(
+                first.components[1] * second.components[2] - first.components[2] * second.components[1],
+                first.components[2] * second.components[0] - first.components[0] * second.components[2],
+                first.components[0] * second.components[1] - first.components[1] * second.components[0]
         );
     }
 
@@ -77,6 +85,32 @@ public class Vector4f extends Vector {
                 components[1] * scalar,
                 components[2] * scalar,
                 components[3] * scalar
+        );
+    }
+
+    public Vector4f multiply(Vector4f other) {
+        return new Vector4f(
+                components[0] * other.components[0],
+                components[1] * other.components[1],
+                components[2] * other.components[2],
+                components[3] * other.components[3]
+        );
+    }
+
+    public static Vector4f multiply(Vector4f first, Vector4f second) {
+        return new Vector4f(
+                first.components[0] * second.components[0],
+                first.components[1] * second.components[1],
+                first.components[2] * second.components[2],
+                first.components[3] * second.components[3]
+        );
+    }
+
+    public Vector3f normalizeTo3f() {
+        return new Vector3f(
+                components[0] / components[3],
+                components[1] / components[3],
+                components[2] / components[3]
         );
     }
 }

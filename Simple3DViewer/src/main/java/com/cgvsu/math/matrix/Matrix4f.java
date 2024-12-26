@@ -102,28 +102,26 @@ public class Matrix4f extends Matrix {
 
     @Override
     public Matrix4f inverse() {
-        float det = this.determinate();
+        float det = this.determinant();
         if (det == 0) {
-            throw new NullPointerException("Обратной матрицы не существует, определитель равен ноль");
+            throw new ArithmeticException("Обратной матрицы не существует, определитель равен ноль");
         }
         float[][] matrix = this.minor().getMatrix();
 
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 matrix[i][j] = matrix[i][j] / det;
-                if ((i == 0 && j == 1) || (i == 1 && j == 0) || (i == 1 && j == 2) || (i == 2 && j == 1) || (i == 0 && j == 3) || (i == 3 && j == 0) || (i == 3 && j == 2) || (i == 2 && j == 3)) {
+                if ((i + j) % 2 != 0) {
                     matrix[i][j] *= -1;
                 }
             }
         }
         Matrix4f result = new Matrix4f(matrix);
-        result = result.transpose();
-
-        return result;
+        return result.transpose();
     }
 
     @Override
-    public float determinate() {
+    public float determinant() {
         float[][] data1 = new float[3][3];
         float[][] data2 = new float[3][3];
         float[][] data3 = new float[3][3];
@@ -159,7 +157,7 @@ public class Matrix4f extends Matrix {
         Matrix3f m3 = new Matrix3f(data3);
         Matrix3f m4 = new Matrix3f(data4);
 
-        return (matrix[0][0] * m1.determinate() - matrix[0][1] * m2.determinate() + matrix[0][2] * m3.determinate() - matrix[0][3] * m4.determinate());
+        return (matrix[0][0] * m1.determinant() - matrix[0][1] * m2.determinant() + matrix[0][2] * m3.determinant() - matrix[0][3] * m4.determinant());
     }
 
     @Override
@@ -186,7 +184,7 @@ public class Matrix4f extends Matrix {
                     kI++;
                 }
                 Matrix3f tempM = new Matrix3f(temp);
-                minor[i][j] = tempM.determinate();
+                minor[i][j] = tempM.determinant();
             }
         }
         return new Matrix4f(minor);
@@ -199,7 +197,7 @@ public class Matrix4f extends Matrix {
         }
         for (int i = 0; i < this.matrix.length; i++) {
             for (int j = 0; j < this.matrix.length; j++) {
-                if (Math.abs(this.matrix[i][j] - other.getMatrix()[i][j]) > 10e-6) {
+                if (Math.abs(this.matrix[i][j] - other.getMatrix()[i][j]) > 1e-6) {
                     return false;
                 }
             }
@@ -210,51 +208,5 @@ public class Matrix4f extends Matrix {
     @Override
     protected Matrix createInstance(float[][] data) {
         return new Matrix4f(data);
-    }
-
-    public static Matrix4f rotateMatrix4f(float angleX, float angleY, float angleZ) {
-        Matrix4f rotationX = rotateX(angleX);
-        Matrix4f rotationY = rotateY(angleY);
-        Matrix4f rotationZ = rotateZ(angleZ);
-        return rotationZ.multiply(rotationY).multiply(rotationX);
-    }
-
-    public static Matrix4f rotateX(float angleX) {
-        float cos = (float) Math.cos(Math.toRadians(angleX));
-        float sin = (float) Math.sin(Math.toRadians(angleX));
-        float[][] matrix = new float[][]
-                {
-                        {1, 0, 0, 0},
-                        {0, cos, sin, 0},
-                        {0, -sin, cos, 0},
-                        {0, 0, 0, 1}
-                };
-        return new Matrix4f(matrix);
-    }
-
-    public static Matrix4f rotateY(float angleY) {
-        float cos = (float) Math.cos(Math.toRadians(angleY));
-        float sin = (float) Math.sin(Math.toRadians(angleY));
-        float[][] matrix = new float[][]
-                {
-                        {cos, 0, -sin, 0},
-                        {0, 1, 0, 0},
-                        {sin, 0, cos, 0},
-                        {0, 0, 0, 1}
-                };
-        return new Matrix4f(matrix);
-    }
-
-    public static Matrix4f rotateZ(float angleZ) {
-        float cos = (float) Math.cos(Math.toRadians(angleZ));
-        float sin = (float) Math.sin(Math.toRadians(angleZ));
-        float[][] matrix = new float[][]
-                {
-                        {cos, sin, 0, 0},
-                        {-sin, cos, 0, 0},
-                        {0, 0, 1, 0},
-                        {0, 0, 0, 1}
-                };
-        return new Matrix4f(matrix);
     }
 }

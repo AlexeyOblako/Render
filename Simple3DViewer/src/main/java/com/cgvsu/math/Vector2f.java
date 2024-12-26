@@ -72,4 +72,11 @@ public class Vector2f extends Vector {
                 components[1] * scalar
         );
     }
+
+    public Vector2f multiply(Vector2f other) {
+        return new Vector2f(
+                components[0] * other.components[0],
+                components[1] * other.components[1]
+        );
+    }
 }

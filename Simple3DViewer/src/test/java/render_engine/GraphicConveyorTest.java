@@ -185,12 +185,16 @@ public class GraphicConveyorTest {
 
         float tangentMinusOnDegree = (float) (1.0F / (Math.tan(fov * 0.5F)));
         float[][] expected = {
-                {tangentMinusOnDegree, 0, 0, 0},
-                {0, tangentMinusOnDegree / aspectRatio, 0, 0},
-                {0, 0, (farPlane + nearPlane) / (farPlane - nearPlane), 2 * (nearPlane * farPlane) / (nearPlane - farPlane)},
-                {0, 0, 1.0F, 0}
+                {tangentMinusOnDegree / aspectRatio, 0, 0, 0},
+                {0, tangentMinusOnDegree, 0, 0},
+                {0, 0, (farPlane + nearPlane) / (nearPlane - farPlane), (2 * farPlane * nearPlane) / (nearPlane - farPlane)},
+                {0, 0, -1.0F, 0}
         };
 
-        assertArrayEquals(expected, perspectiveMatrix.getMatrix());
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                assertEquals(expected[i][j], perspectiveMatrix.getMatrix()[i][j], 1e-6);
+            }
+        }
     }
 }

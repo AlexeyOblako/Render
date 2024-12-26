@@ -107,20 +107,14 @@ public class GraphicConveyor {
     }
 
 
-    public static Matrix4f perspective(
-            final float fov,
-            final float aspectRatio,
-            final float nearPlane,
-            final float farPlane) {
-        Matrix4f result = new Matrix4f();
-        float tangent = (float) (1.0F / (Math.tan(fov * 0.5F)));
-        result.setValue(0, 0, tangent / aspectRatio);
-        result.setValue(1, 1, tangent);
-        result.setValue(2, 2, (farPlane + nearPlane) / (farPlane - nearPlane));
-        result.setValue(2, 3, 2 * (nearPlane * farPlane) / (farPlane - nearPlane));
-        result.setValue(3, 2, 1.0F);
-        result.setValue(3, 3, 0.0F);
-        return result;
+    public static Matrix4f perspective(float fov, float aspectRatio, float nearPlane, float farPlane) {
+        float tangentMinusOnDegree = (float) (1.0F / (Math.tan(fov * 0.5F)));
+        return new Matrix4f(new float[][] {
+                {tangentMinusOnDegree / aspectRatio, 0, 0, 0},
+                {0, tangentMinusOnDegree, 0, 0},
+                {0, 0, (farPlane + nearPlane) / (nearPlane - farPlane), (2 * farPlane * nearPlane) / (nearPlane - farPlane)},
+                {0, 0, 1.0F, 0}
+        });
     }
 
     public static Vector2f vertexToPoint(final Vector3f vertex, final int width, final int height) {

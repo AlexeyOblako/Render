@@ -102,9 +102,9 @@ public class Matrix3f extends Matrix {
 
     @Override
     public Matrix3f inverse() {
-        float det = this.determinate();
+        float det = this.determinant();
         if (det == 0) {
-            throw new NullPointerException("Обратной матрицы не существует, определитель равен ноль");
+            throw new ArithmeticException("Обратной матрицы не существует, определитель равен ноль");
         }
         float[][] matrix = this.minor().getMatrix();
 
@@ -118,13 +118,11 @@ public class Matrix3f extends Matrix {
         }
 
         Matrix3f result = new Matrix3f(matrix);
-        result = result.transpose();
-
-        return result;
+        return result.transpose();
     }
 
     @Override
-    public float determinate() {
+    public float determinant() {
         return (matrix[0][0] * matrix[1][1] * matrix[2][2] - matrix[0][2] * matrix[1][1] * matrix[2][0] + matrix[0][1] * matrix[1][2] * matrix[2][0] - matrix[0][1] * matrix[1][0] * matrix[2][2] + matrix[0][2] * matrix[1][0] * matrix[2][1] - matrix[0][0] * matrix[1][2] * matrix[2][1]);
     }
 
@@ -164,7 +162,7 @@ public class Matrix3f extends Matrix {
         }
         for (int i = 0; i < this.matrix.length; i++) {
             for (int j = 0; j < this.matrix.length; j++) {
-                if (Math.abs(this.matrix[i][j] - other.getMatrix()[i][j]) > 10e-6) {
+                if (Math.abs(this.matrix[i][j] - other.getMatrix()[i][j]) > 1e-6) {
                     return false;
                 }
             }

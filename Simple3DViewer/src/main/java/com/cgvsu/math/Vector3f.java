@@ -115,4 +115,20 @@ public class Vector3f extends Vector {
                 vector.components[2] * scalar
         );
     }
+
+    public Vector3f multiply(Vector3f other) {
+        return new Vector3f(
+                components[0] * other.components[0],
+                components[1] * other.components[1],
+                components[2] * other.components[2]
+        );
+    }
+
+    public static Vector3f multiply(Vector3f first, Vector3f second) {
+        return new Vector3f(
+                first.components[0] * second.components[0],
+                first.components[1] * second.components[1],
+                first.components[2] * second.components[2]
+        );
+    }
 }

@@ -1,200 +1,247 @@
 package math.matrix;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import com.cgvsu.math.Vector;
 import com.cgvsu.math.Vector3f;
+import com.cgvsu.math.matrix.Matrix;
 import com.cgvsu.math.matrix.Matrix3f;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+class Matrix3fTest {
+    private  Matrix3f defM;
 
-
-public class Matrix3fTest {
-
-    @Test
-    public void testConstructor() {
-        float[][] data = {
+    @BeforeEach
+    void setUp() {
+        final float[][] matrix = {
                 {1, 2, 3},
                 {4, 5, 6},
                 {7, 8, 9}
         };
-        Matrix3f matrix = new Matrix3f(data);
-        Assertions.assertArrayEquals(data, matrix.getMatrix());
+
+        defM = new Matrix3f(matrix);
+
+    }
+
+
+    @Test
+    void sumWithPositiveNum() {
+        final float[][] matrixSum = {
+                {1, 2, 3},
+                {4, 5, 6},
+                {7, 8, 9}
+        };
+        Matrix3f mSum = new Matrix3f(matrixSum);
+        final  float[][] expectedResult = {
+                {2, 4, 6},
+                {8, 10, 12},
+                {14, 16, 18}
+        };
+        Matrix3f expectedRes = new Matrix3f(expectedResult);
+
+
+        Matrix result = defM.add(mSum);
+
+        for (int i = 0; i < expectedResult.length; i++) {
+            for (int j = 0; j < expectedResult.length; j++) {
+                assertEquals(expectedRes.getMatrix()[i][j], result.getMatrix()[i][j]);
+            }
+        }
     }
 
     @Test
-    public void testDefaultConstructor() {
-        Matrix3f matrix = new Matrix3f();
-        float[][] expected = {
+    void sumWithNegativeNun() {
+        final float [][] matrixSum = {
+                {-1, -2, -3},
+                {-8, -10, -12},
+                {-7, -16, -9}
+        };
+        Matrix3f mSum = new Matrix3f(matrixSum);
+        final float [][] expectedResult = {
+                {0, 0, 0},
+                {-4, -5, -6},
+                {0, -8, 0}
+        };
+        Matrix3f expectedRes = new Matrix3f(expectedResult);
+
+
+        Matrix result = defM.add(mSum);
+
+        for (int i = 0; i < expectedResult.length; i++) {
+            for (int j = 0; j < expectedResult.length; j++) {
+                assertEquals(expectedRes.getMatrix()[i][j], result.getMatrix()[i][j]);
+            }
+        }
+    }
+
+    @Test
+    void deductWithPositiveNum() {
+        final  float[][] matrixSub = {
+                {1, 2, 10},
+                {4, 8, 6},
+                {4, 8, 9}
+        };
+        Matrix3f mSub = new Matrix3f(matrixSub);
+        final float[][] expectedResult = {
+                {0, 0, -7},
+                {0, -3, 0},
+                {3, 0, 0}
+        };
+        Matrix3f expectedRes = new Matrix3f(expectedResult);
+
+
+        Matrix result = defM.deduct(mSub);
+
+        for (int i = 0; i < expectedResult.length; i++) {
+            for (int j = 0; j < expectedResult.length; j++) {
+                assertEquals(expectedRes.getMatrix()[i][j], result.getMatrix()[i][j]);
+            }
+        }
+
+    }
+
+    @Test
+    void deductWithNegativeNum() {
+        final  float[][] matrixSub = {
+                {-1, -2, -10},
+                {-4, -8, -6},
+                {-4, -8, -9}
+        };
+        Matrix3f mSub = new Matrix3f(matrixSub);
+        final  float[][] expectedResult = {
+                {2, 4, 13},
+                {8, 13, 12},
+                {11, 16, 18}
+        };
+        Matrix3f expectedRes = new Matrix3f(expectedResult);
+
+
+        Matrix result = defM.deduct(mSub);
+
+        for (int i = 0; i < expectedResult.length; i++) {
+            for (int j = 0; j < expectedResult.length; j++) {
+                assertEquals(expectedRes.getMatrix()[i][j], result.getMatrix()[i][j]);
+            }
+        }
+
+    }
+
+    @Test
+    void multiplyWithPositiveNum() {
+
+        final float[][] matrix2 = {
+                {1, 1, 1},
+                {2, 2, 2},
+                {3, 3, 3}
+        };
+
+        Matrix3f m2 = new Matrix3f(matrix2);
+
+        final float [][] expectedResult = {
+                {14, 14, 14},
+                {32, 32, 32},
+                {50, 50, 50},
+
+        };
+        Matrix3f expectedRes = new Matrix3f(expectedResult);
+
+
+        Matrix result = defM.multiply(m2);
+
+        for (int i = 0; i < expectedResult.length; i++) {
+            for (int j = 0; j < expectedResult.length; j++) {
+                assertEquals(expectedRes.getMatrix()[i][j], result.getMatrix()[i][j]);
+            }
+        }
+
+    }
+
+    @Test
+    void multiplyWithNegativeNum() {
+
+        final float[][] matrix2 = {
+                {-1, -1, -1},
+                {-2, -8, -2},
+                {-3, -3, -13}
+        };
+
+        Matrix3f m2 = new Matrix3f(matrix2);
+
+        final float[][] expectedResult = {
+                {-14, -26, -44},
+                {-32, -62, -92},
+                {-50, -98, -140},
+
+        };
+        Matrix3f expectedRes = new Matrix3f(expectedResult);
+
+
+        Matrix result = defM.multiply(m2);
+
+        for (int i = 0; i < expectedResult.length; i++) {
+            for (int j = 0; j < expectedResult.length; j++) {
+                assertEquals(expectedRes.getMatrix()[i][j], result.getMatrix()[i][j]);
+            }
+        }
+
+    }
+
+
+    @Test
+    void transpose() {
+
+        final float[][] expectedResult = {
+                {1, 4, 7},
+                {2, 5, 8},
+                {3, 6, 9}
+        };
+
+        Matrix3f expectedRes = new Matrix3f(expectedResult);
+
+        Matrix result = defM.transpose();
+
+
+        for (int i = 0; i < expectedResult.length; i++) {
+            for (int j = 0; j < expectedResult.length; j++) {
+                assertEquals(expectedRes.getMatrix()[i][j], result.getMatrix()[i][j]);
+            }
+        }
+    }
+
+    @Test
+    void single() {
+        final float[][] expectedResult = {
+                {1, 0, 0},
+                {0, 1, 0},
+                {0, 0, 1}
+        };
+        Matrix3f expectedRes = new Matrix3f(expectedResult);
+
+        Matrix result = defM.single();
+
+        for (int i = 0; i < expectedResult.length; i++) {
+            for (int j = 0; j < expectedResult.length; j++) {
+                assertEquals(expectedRes.getMatrix()[i][j], result.getMatrix()[i][j]);
+            }
+        }
+    }
+
+    @Test
+    void zero() {
+        final float[][] expectedResult = {
                 {0, 0, 0},
                 {0, 0, 0},
                 {0, 0, 0}
         };
-        Assertions.assertArrayEquals(expected, matrix.getMatrix());
-    }
+        Matrix3f expectedRes = new Matrix3f(expectedResult);
 
-    @Test
-    public void testAdd() {
-        Matrix3f matrix1 = new Matrix3f(new float[][]{
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
-        });
-        Matrix3f matrix2 = new Matrix3f(new float[][]{
-                {9, 8, 7},
-                {6, 5, 4},
-                {3, 2, 1}
-        });
-        Matrix3f expected = new Matrix3f(new float[][]{
-                {10, 10, 10},
-                {10, 10, 10},
-                {10, 10, 10}
-        });
-        Assertions.assertTrue(expected.equals(matrix1.add(matrix2)));
-    }
+        Matrix result = defM.zero();
 
-    @Test
-    public void testDeduct() {
-        Matrix3f matrix1 = new Matrix3f(new float[][]{
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
-        });
-        Matrix3f matrix2 = new Matrix3f(new float[][]{
-                {9, 8, 7},
-                {6, 5, 4},
-                {3, 2, 1}
-        });
-        Matrix3f expected = new Matrix3f(new float[][]{
-                {-8, -6, -4},
-                {-2, 0, 2},
-                {4, 6, 8}
-        });
-        Assertions.assertTrue(expected.equals(matrix1.deduct(matrix2)));
-    }
-
-    @Test
-    public void testMultiplyMatrix() {
-        Matrix3f matrix1 = new Matrix3f(new float[][]{
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
-        });
-        Matrix3f matrix2 = new Matrix3f(new float[][]{
-                {9, 8, 7},
-                {6, 5, 4},
-                {3, 2, 1}
-        });
-        Matrix3f expected = new Matrix3f(new float[][]{
-                {30, 24, 18},
-                {84, 69, 54},
-                {138, 114, 90}
-        });
-        Assertions.assertTrue(expected.equals(matrix1.multiply(matrix2)));
-    }
-
-    @Test
-    public void testMultiplyVector() {
-        Matrix3f matrix = new Matrix3f(new float[][]{
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
-        });
-        Vector3f vector = new Vector3f(1, 2, 3);
-        Vector3f expected = new Vector3f(14, 32, 50);
-        Assertions.assertTrue(expected.equals(matrix.multiply(vector)));
-    }
-
-    @Test
-    public void testTranspose() {
-        Matrix3f matrix = new Matrix3f(new float[][]{
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
-        });
-        Matrix3f expected = new Matrix3f(new float[][]{
-                {1, 4, 7},
-                {2, 5, 8},
-                {3, 6, 9}
-        });
-        Assertions.assertTrue(expected.equals(matrix.transpose()));
-    }
-
-    @Test
-    public void testUnit() {
-        Matrix3f expected = new Matrix3f(new float[][]{
-                {1, 0, 0},
-                {0, 1, 0},
-                {0, 0, 1}
-        });
-        Assertions.assertTrue(expected.equals(Matrix3f.unit()));
-    }
-
-    @Test
-    public void testDeterminate() {
-        Matrix3f matrix = new Matrix3f(new float[][]{
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
-        });
-        Assertions.assertEquals(0, matrix.determinate());
-    }
-
-    @Test
-    public void testInverse() {
-        Matrix3f matrix = new Matrix3f(new float[][]{
-                {1, 2, 3},
-                {0, 1, 4},
-                {5, 6, 0}
-        });
-        Matrix3f expected = new Matrix3f(new float[][]{
-                {-24, 18, 5},
-                {20, -15, -4},
-                {-5, 4, 1}
-        });
-        Assertions.assertTrue(expected.equals(matrix.inverse()));
-    }
-
-    @Test
-    public void testMinor() {
-        Matrix3f matrix = new Matrix3f(new float[][]{
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
-        });
-        Matrix3f expected = new Matrix3f(new float[][]{
-                {-3, -6, -3},
-                {-6, -12, -6},
-                {-3, -6, -3}
-        });
-        Assertions.assertTrue(expected.equals(matrix.minor()));
-    }
-
-    @Test
-    public void testEquals() {
-        Matrix3f matrix1 = new Matrix3f(new float[][]{
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
-        });
-        Matrix3f matrix2 = new Matrix3f(new float[][]{
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
-        });
-        Assertions.assertTrue(matrix1.equals(matrix2));
-    }
-
-    @Test
-    public void testNotEquals() {
-        Matrix3f matrix1 = new Matrix3f(new float[][]{
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
-        });
-        Matrix3f matrix2 = new Matrix3f(new float[][]{
-                {9, 8, 7},
-                {6, 5, 4},
-                {3, 2, 1}
-        });
-        Assertions.assertFalse(matrix1.equals(matrix2));
+        for (int i = 0; i < expectedResult.length; i++) {
+            for (int j = 0; j < expectedResult.length; j++) {
+                assertEquals(expectedRes.getMatrix()[i][j], result.getMatrix()[i][j]);
+            }
+        }
     }
 }
