@@ -1,19 +1,15 @@
 package com.cgvsu.render_engine;
 
 import com.cgvsu.math.Vector3f;
-import com.cgvsu.math.Vector4f;
 import com.cgvsu.math.matrix.Matrix4f;
-import static com.cgvsu.render_engine.GraphicConveyor.*;
 
 public class Camera {
     private Vector3f position;
     private Vector3f target;
-    private Vector3f initialDirection;
     private float fov;
     private float aspectRatio;
     private float nearPlane;
     private float farPlane;
-    private float distanceToTarget;
 
     public Camera(
             final Vector3f position,
@@ -24,8 +20,6 @@ public class Camera {
             final float farPlane) {
         this.position = position;
         this.target = target;
-        this.initialDirection = target.deduct(position).normalize();
-        this.distanceToTarget = position.deduct(target).length();
         this.fov = fov;
         this.aspectRatio = aspectRatio;
         this.nearPlane = nearPlane;
@@ -65,33 +59,35 @@ public class Camera {
         this.target.add(translation);
     }
 
-    public Matrix4f getViewMatrix() {
-        return lookAt(position, target);
+    Matrix4f getViewMatrix() {
+        return GraphicConveyor.lookAt(position, target);
     }
 
-    public Matrix4f getProjectionMatrix() {
-        return perspective(fov, aspectRatio, nearPlane, farPlane);
+    Matrix4f getProjectionMatrix() {
+        return GraphicConveyor.perspective(fov, aspectRatio, nearPlane, farPlane);
     }
 
-    public void rotateAroundPosition(float yaw, float pitch) {
-        Vector3f direction = target.deduct(position).normalize();
+    public void rotateAroundTarget(float yaw, float pitch) {
+        //вращение вокруг Y
+        Vector3f direction = target.deduct(position);
+        float yawRad = (float) Math.toRadians(yaw);
+        float cosYaw = (float) Math.cos(yawRad);
+        float sinYaw = (float) Math.sin(yawRad);
+        float newX = direction.getX() * cosYaw - direction.getZ() * sinYaw;
+        float newZ = direction.getX() * sinYaw + direction.getZ() * cosYaw;
+        direction.setX(newX);
+        direction.setZ(newZ);
 
-        Matrix4f yawMatrix = rotateY(yaw);
-        Matrix4f pitchMatrix = rotateX(pitch);
+        //вокруг X
+        float pitchRad = (float) Math.toRadians(pitch);
+        float cosPitch = (float) Math.cos(pitchRad);
+        float sinPitch = (float) Math.sin(pitchRad);
+        float newY = direction.getY() * cosPitch - direction.getZ() * sinPitch;
+        float newZ2 = direction.getY() * sinPitch + direction.getZ() * cosPitch;
+        direction.setY(newY);
+        direction.setZ(newZ2);
 
-        Matrix4f rotationMatrix = pitchMatrix.multiply(yawMatrix);
-        Vector4f direction4f = new Vector4f(direction.getX(), direction.getY(), direction.getZ(), 0.0f);
-        Vector4f rotatedDirection4f = rotationMatrix.multiply(direction4f);
-        Vector3f rotatedDirection = new Vector3f(rotatedDirection4f.getX(), rotatedDirection4f.getY(), rotatedDirection4f.getZ());
-        rotatedDirection.normalize();
-
-        Vector3f newPosition = new Vector3f(
-                target.getX() + rotatedDirection.getX() * -distanceToTarget,
-                target.getY() + rotatedDirection.getY() * -distanceToTarget,
-                target.getZ() + rotatedDirection.getZ() * -distanceToTarget
-        );
-        position = newPosition;
-
-        initialDirection = rotatedDirection;
+        //обновляем позицию
+        position = target.deduct(direction);
     }
 }

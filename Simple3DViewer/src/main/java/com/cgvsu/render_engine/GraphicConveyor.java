@@ -1,9 +1,9 @@
 package com.cgvsu.render_engine;
 
 import com.cgvsu.math.Vector2f;
-import com.cgvsu.math.Vector3f;
-import com.cgvsu.math.Vector4f;
 import com.cgvsu.math.matrix.Matrix4f;
+import com.cgvsu.math.Vector3f;
+
 
 public class GraphicConveyor {
     public static Matrix4f scaleMatrix4f(float scaleX, float scaleY, float scaleZ) {
@@ -82,6 +82,7 @@ public class GraphicConveyor {
         );
     }
 
+
     public static Matrix4f lookAt(Vector3f eye, Vector3f target) {
         return lookAt(eye, target, new Vector3f(0F, 1.0F, 0F));
     }
@@ -105,6 +106,7 @@ public class GraphicConveyor {
         return new Matrix4f(matrix);
     }
 
+
     public static Matrix4f perspective(
             final float fov,
             final float aspectRatio,
@@ -124,4 +126,8 @@ public class GraphicConveyor {
     public static Vector2f vertexToPoint(final Vector3f vertex, final int width, final int height) {
         return new Vector2f(vertex.getX() * width + width / 2.0F, -vertex.getY() * height + height / 2.0F);
     }
+
+
+
+
 }
