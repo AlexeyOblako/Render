@@ -11,7 +11,6 @@ import com.cgvsu.math.matrix.Matrix4f;
 import static com.cgvsu.render_engine.GraphicConveyor.*;
 
 public class RenderEngine {
-
     public static void render(
             final GraphicsContext graphicsContext,
             final Camera camera,
@@ -34,12 +33,12 @@ public class RenderEngine {
             final int nVerticesInPolygon = mesh.polygons.get(polygonInd).getVertexIndices().size();
 
             ArrayList<Vector2f> resultPoints = new ArrayList<>();
-            for (int vertexInPolygonInd = 0; vertexInPolygonInd < nVerticesInPolygon; ++vertexInPolygonInd) {//цикл по вершинам полигона
+            for (int vertexInPolygonInd = 0; vertexInPolygonInd < nVerticesInPolygon; ++vertexInPolygonInd) {
                 Vector3f vertex = mesh.vertices.get(mesh.polygons.get(polygonInd).getVertexIndices().get(vertexInPolygonInd));
 
                 Vector4f vertexVecmath = new Vector4f(vertex.getX(), vertex.getY(), vertex.getZ(), 1);
 
-                Vector2f resultPoint = vertexToPoint(Matrix4f.multiply(modelViewProjectionMatrix, vertexVecmath).normalizeTo3f(), width, height);//преобразуем в экранные коорд.
+                Vector2f resultPoint = vertexToPoint(Matrix4f.multiply(modelViewProjectionMatrix, vertexVecmath).normalizeTo3f(), width, height);
                 resultPoints.add(resultPoint);
             }
 
