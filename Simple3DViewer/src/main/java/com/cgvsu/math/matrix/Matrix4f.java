@@ -2,74 +2,82 @@ package com.cgvsu.math.matrix;
 
 import com.cgvsu.math.Vector4f;
 
-import javax.vecmath.Vector3f;
-import java.util.Arrays;
-
-public class Matrix4f {
-    private float[][] matrix = new float[4][4];
-
+public class Matrix4f extends Matrix {
     public Matrix4f(float[][] data) {
+        super(data);
         if (data.length != 4 || data[0].length != 4) {
             throw new IllegalArgumentException("Матрица должна быть размерностью 4на4");
         }
-        this.matrix = data;
     }
 
     public Matrix4f() {
-        this.matrix = new float[][]
-                {
-                        {0, 0, 0, 0},
-                        {0, 0, 0, 0},
-                        {0, 0, 0, 0},
-                        {0, 0, 0, 0}
-                };
+        super(4);
     }
 
-
-    public float[][] getMatrix() {
-        return matrix;
-    }
-
-    public void setValue(int i, int j, float value) {
-        matrix[i][j] = value;
-    }
-
-    public float getValue(int i, int j) {
-        return matrix[i][j];
-    }
-
-    //сложение
-    public Matrix4f add(Matrix4f other) {
+    @Override
+    public Matrix4f add(Matrix other) {
         if (other == null) {
-            throw new NullPointerException("Матрица не может быть нулевая");
+            throw new NullPointerException("Матрица не может быть нулевой");
         }
         float[][] result = new float[4][4];
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                result[i][j] = this.matrix[i][j] + other.matrix[i][j];
+                result[i][j] = this.matrix[i][j] + other.getMatrix()[i][j];
             }
         }
         return new Matrix4f(result);
     }
 
-    //вычитание
-    public Matrix4f deduct(Matrix4f other) {
+    @Override
+    public Matrix4f deduct(Matrix other) {
         if (other == null) {
-            throw new NullPointerException("Матрица не может быть нулевая");
+            throw new NullPointerException("Матрица не может быть нулевой");
         }
         float[][] result = new float[4][4];
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                result[i][j] = this.matrix[i][j] - other.matrix[i][j];
+                result[i][j] = this.matrix[i][j] - other.getMatrix()[i][j];
             }
         }
         return new Matrix4f(result);
     }
 
-    //умножение на вектор
+    @Override
+    public Matrix4f multiply(Matrix other) {
+        if (other == null) {
+            throw new NullPointerException("Матрица не может быть нулевой");
+        }
+        float[][] result = new float[4][4];
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                result[i][j] = 0;
+                for (int k = 0; k < 4; k++) {
+                    result[i][j] += this.matrix[i][k] * other.getMatrix()[k][j];
+                }
+            }
+        }
+        return new Matrix4f(result);
+    }
+
+    public static Matrix4f multiply(Matrix4f first, Matrix4f second) {
+        if (first == null || second == null) {
+            throw new NullPointerException("Матрица не может быть нулевой");
+        }
+        float[][] result = new float[4][4];
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                result[i][j] = 0;
+                for (int k = 0; k < 4; k++) {
+                    result[i][j] += first.getMatrix()[i][k] * second.getMatrix()[k][j];
+                }
+            }
+        }
+        return new Matrix4f(result);
+    }
+
     public Vector4f multiply(Vector4f vector) {
         if (vector == null) {
-            throw new NullPointerException("Вектор не может быть нулевой");
+            throw new NullPointerException("Вектор не может быть нулевым");
         }
         float[] result = new float[4];
         for (int i = 0; i < 4; i++) {
@@ -81,57 +89,7 @@ public class Matrix4f {
         return new Vector4f(result);
     }
 
-    public static Vector4f multiply(Matrix4f matrix4f, Vector4f vector4f) {
-        if (vector4f == null) {
-            throw new NullPointerException("Вектор не может быть нулевой");
-        }
-        if (matrix4f == null) {
-            throw new NullPointerException("Вектор не может быть нулевой");
-        }
-        float[] result = new float[4];
-        for (int i = 0; i < 4; i++) {
-            result[i] = 0;
-            for (int j = 0; j < 4; j++) {
-                result[i] += matrix4f.matrix[i][j] * vector4f.get(j);
-            }
-        }
-        return new Vector4f(result);
-    }
-
-    // умножение на матрицу
-    public Matrix4f multiply(Matrix4f other) {
-        if (other == null) {
-            throw new NullPointerException("Матрица не может быть нулевая");
-        }
-        float[][] result = new float[4][4];
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                result[i][j] = 0;
-                for (int k = 0; k < 4; k++) {
-                    result[i][j] += this.matrix[i][k] * other.matrix[k][j];
-                }
-            }
-        }
-        return new Matrix4f(result);
-    }
-
-    public static Matrix4f multiply(Matrix4f first, Matrix4f second) {
-        if (first == null || second == null) {
-            throw new NullPointerException("Матрица не может быть нулевая");
-        }
-        float[][] result = new float[4][4];
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                result[i][j] = 0;
-                for (int k = 0; k < 4; k++) {
-                    result[i][j] += first.matrix[i][k] * second.matrix[k][j];
-                }
-            }
-        }
-        return new Matrix4f(result);
-    }
-
-    // транспонирование
+    @Override
     public Matrix4f transpose() {
         float[][] result = new float[4][4];
         for (int i = 0; i < 4; i++) {
@@ -142,18 +100,29 @@ public class Matrix4f {
         return new Matrix4f(result);
     }
 
-    // единичная
-    public static Matrix4f unit() {
-        float[][] unitMatrix = new float[][]{
-                {1, 0, 0, 0},
-                {0, 1, 0, 0},
-                {0, 0, 1, 0},
-                {0, 0, 0, 1}
-        };
-        return new Matrix4f(unitMatrix);
+    @Override
+    public Matrix4f inverse() {
+        float det = this.determinate();
+        if (det == 0) {
+            throw new NullPointerException("Обратной матрицы не существует, определитель равен ноль");
+        }
+        float[][] matrix = this.minor().getMatrix();
+
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                matrix[i][j] = matrix[i][j] / det;
+                if ((i == 0 && j == 1) || (i == 1 && j == 0) || (i == 1 && j == 2) || (i == 2 && j == 1) || (i == 0 && j == 3) || (i == 3 && j == 0) || (i == 3 && j == 2) || (i == 2 && j == 3)) {
+                    matrix[i][j] *= -1;
+                }
+            }
+        }
+        Matrix4f result = new Matrix4f(matrix);
+        result = result.transpose();
+
+        return result;
     }
 
-    //нахождение детерминанта
+    @Override
     public float determinate() {
         float[][] data1 = new float[3][3];
         float[][] data2 = new float[3][3];
@@ -193,29 +162,7 @@ public class Matrix4f {
         return (matrix[0][0] * m1.determinate() - matrix[0][1] * m2.determinate() + matrix[0][2] * m3.determinate() - matrix[0][3] * m4.determinate());
     }
 
-    public Matrix4f inverse() {
-        float det = this.determinate();
-        if (det == 0) {
-            throw new NullPointerException("Обратной матрицы не существует, определитель равен ноль");
-        }
-        float[][] matrix = this.minor().getMatrix();
-
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                matrix[i][j] = matrix[i][j] / det;
-                if ((i == 0 && j == 1) || (i == 1 && j == 0) || (i == 1 && j == 2) || (i == 2 && j == 1) || (i == 0 && j == 3) || (i == 3 && j == 0) || (i == 3 && j == 2) || (i == 2 && j == 3)) {
-                    matrix[i][j] *= -1;
-                }
-            }
-        }
-        System.out.println(Arrays.deepToString(matrix));
-        Matrix4f result = new Matrix4f(matrix);
-        result = result.transpose();
-
-        return result;
-
-    }
-
+    @Override
     public Matrix4f minor() {
         float[][] minor = new float[4][4];
         for (int i = 0; i < 4; i++) {
@@ -240,22 +187,74 @@ public class Matrix4f {
                 }
                 Matrix3f tempM = new Matrix3f(temp);
                 minor[i][j] = tempM.determinate();
-
             }
         }
         return new Matrix4f(minor);
     }
 
-    public boolean equals(Matrix4f matrix4f) {
-        int length = this.matrix.length;
-
-        for (int i = 0; i < length; i++) {
-            for (int j = 0; j < length; j++) {
-                if (Math.abs(this.matrix[i][j] - matrix4f.matrix[i][j]) > 10e-6) {
+    @Override
+    public boolean equals(Matrix other) {
+        if (other == null || other.getMatrix().length != this.matrix.length) {
+            return false;
+        }
+        for (int i = 0; i < this.matrix.length; i++) {
+            for (int j = 0; j < this.matrix.length; j++) {
+                if (Math.abs(this.matrix[i][j] - other.getMatrix()[i][j]) > 10e-6) {
                     return false;
                 }
             }
         }
         return true;
+    }
+
+    @Override
+    protected Matrix createInstance(float[][] data) {
+        return new Matrix4f(data);
+    }
+
+    public static Matrix4f rotateMatrix4f(float angleX, float angleY, float angleZ) {
+        Matrix4f rotationX = rotateX(angleX);
+        Matrix4f rotationY = rotateY(angleY);
+        Matrix4f rotationZ = rotateZ(angleZ);
+        return rotationZ.multiply(rotationY).multiply(rotationX);
+    }
+
+    public static Matrix4f rotateX(float angleX) {
+        float cos = (float) Math.cos(Math.toRadians(angleX));
+        float sin = (float) Math.sin(Math.toRadians(angleX));
+        float[][] matrix = new float[][]
+                {
+                        {1, 0, 0, 0},
+                        {0, cos, sin, 0},
+                        {0, -sin, cos, 0},
+                        {0, 0, 0, 1}
+                };
+        return new Matrix4f(matrix);
+    }
+
+    public static Matrix4f rotateY(float angleY) {
+        float cos = (float) Math.cos(Math.toRadians(angleY));
+        float sin = (float) Math.sin(Math.toRadians(angleY));
+        float[][] matrix = new float[][]
+                {
+                        {cos, 0, -sin, 0},
+                        {0, 1, 0, 0},
+                        {sin, 0, cos, 0},
+                        {0, 0, 0, 1}
+                };
+        return new Matrix4f(matrix);
+    }
+
+    public static Matrix4f rotateZ(float angleZ) {
+        float cos = (float) Math.cos(Math.toRadians(angleZ));
+        float sin = (float) Math.sin(Math.toRadians(angleZ));
+        float[][] matrix = new float[][]
+                {
+                        {cos, sin, 0, 0},
+                        {-sin, cos, 0, 0},
+                        {0, 0, 1, 0},
+                        {0, 0, 0, 1}
+                };
+        return new Matrix4f(matrix);
     }
 }

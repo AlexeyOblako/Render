@@ -58,4 +58,18 @@ public class Vector2f extends Vector {
         components[0] = x;
         components[1] = y;
     }
+
+    public static Vector2f multiply(Vector2f vector, float scalar) {
+        return new Vector2f(
+                vector.components[0] * scalar,
+                vector.components[1] * scalar
+        );
+    }
+
+    public Vector2f multiply(float scalar) {
+        return new Vector2f(
+                components[0] * scalar,
+                components[1] * scalar
+        );
+    }
 }

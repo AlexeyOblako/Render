@@ -61,4 +61,22 @@ public class Vector4f extends Vector {
                 components[2] / components[3]
         );
     }
+
+    public static Vector4f multiply(Vector4f vector, float scalar) {
+        return new Vector4f(
+                vector.components[0] * scalar,
+                vector.components[1] * scalar,
+                vector.components[2] * scalar,
+                vector.components[3] * scalar
+        );
+    }
+
+    public Vector4f multiply(float scalar) {
+        return new Vector4f(
+                components[0] * scalar,
+                components[1] * scalar,
+                components[2] * scalar,
+                components[3] * scalar
+        );
+    }
 }

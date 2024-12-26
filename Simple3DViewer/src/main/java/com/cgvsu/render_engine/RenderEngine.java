@@ -1,14 +1,17 @@
 package com.cgvsu.render_engine;
 
-import java.util.ArrayList;
-
 import com.cgvsu.math.Vector2f;
 import com.cgvsu.math.Vector4f;
-import javafx.scene.canvas.GraphicsContext;
-import com.cgvsu.model.Model;
-import com.cgvsu.math.Vector3f;
 import com.cgvsu.math.matrix.Matrix4f;
-import static com.cgvsu.render_engine.GraphicConveyor.*;
+import com.cgvsu.model.Model;
+import com.cgvsu.model.Polygon;
+import com.cgvsu.math.Vector3f;
+import com.cgvsu.render_engine.Camera;
+import com.cgvsu.render_engine.GraphicConveyor;
+
+import javafx.scene.canvas.GraphicsContext;
+
+import java.util.ArrayList;
 
 public class RenderEngine {
 
@@ -34,12 +37,12 @@ public class RenderEngine {
             final int nVerticesInPolygon = mesh.polygons.get(polygonInd).getVertexIndices().size();
 
             ArrayList<Vector2f> resultPoints = new ArrayList<>();
-            for (int vertexInPolygonInd = 0; vertexInPolygonInd < nVerticesInPolygon; ++vertexInPolygonInd) {//цикл по вершинам полигона
+            for (int vertexInPolygonInd = 0; vertexInPolygonInd < nVerticesInPolygon; ++vertexInPolygonInd) {
                 Vector3f vertex = mesh.vertices.get(mesh.polygons.get(polygonInd).getVertexIndices().get(vertexInPolygonInd));
 
                 Vector4f vertexVecmath = new Vector4f(vertex.getX(), vertex.getY(), vertex.getZ(), 1);
 
-                Vector2f resultPoint = vertexToPoint(Matrix4f.multiply(modelViewProjectionMatrix, vertexVecmath).normalizeTo3f(), width, height);//преобразуем в экранные коорд.
+                Vector2f resultPoint = vertexToPoint(modelViewProjectionMatrix.multiply(vertexVecmath).normalizeTo3f(), width, height);
                 resultPoints.add(resultPoint);
             }
 
@@ -58,5 +61,21 @@ public class RenderEngine {
                         resultPoints.get(0).getX(),
                         resultPoints.get(0).getY());
         }
+    }
+
+    private static Matrix4f rotateScaleTranslate(
+            float scaleX, float scaleY, float scaleZ,
+            float rotationX, float rotationY, float rotationZ,
+            float translationX, float translationY, float translationZ
+    ) {
+        Matrix4f scaleMatrix = GraphicConveyor.scaleMatrix4f(scaleX, scaleY, scaleZ);
+        Matrix4f rotationMatrix = GraphicConveyor.rotateMatrix4f(rotationX, rotationY, rotationZ);
+        Matrix4f translationMatrix = GraphicConveyor.translationMatrix4f(translationX, translationY, translationZ);
+
+        return Matrix4f.multiply(translationMatrix, Matrix4f.multiply(rotationMatrix, scaleMatrix));
+    }
+
+    private static Vector2f vertexToPoint(final Vector3f vertex, final int width, final int height) {
+        return new Vector2f(vertex.getX() * width + width / 2.0F, -vertex.getY() * height + height / 2.0F);
     }
 }

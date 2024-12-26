@@ -28,6 +28,14 @@ public abstract class Vector {
         return createInstance(result);
     }
 
+    public static Vector multiply(Vector vector, float scalar) {
+        float[] result = new float[vector.components.length];
+        for (int i = 0; i < vector.components.length; i++) {
+            result[i] = vector.components[i] * scalar;
+        }
+        return vector.createInstance(result);
+    }
+
     public Vector divide(float scalar) {
         if (scalar == 0) {
             throw new ArithmeticException("Недопустимо, деление на ноль");
