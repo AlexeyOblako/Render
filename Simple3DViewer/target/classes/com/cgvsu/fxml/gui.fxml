@@ -2,8 +2,10 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.canvas.Canvas?>
 
 <AnchorPane fx:id="anchorPane" xmlns:fx="http://javafx.com/fxml" fx:controller="com.cgvsu.GuiController">
@@ -141,5 +143,9 @@
         </Menu>
     </MenuBar>
 
-    <Canvas fx:id="canvas" width="1600" height="870" AnchorPane.topAnchor="30.0"/>
+    <VBox fx:id="modelList" layoutX="10" layoutY="30" spacing="5" AnchorPane.leftAnchor="10" AnchorPane.topAnchor="30">
+        <!-- Model checkboxes will be added here dynamically -->
+    </VBox>
+
+    <Canvas fx:id="canvas" AnchorPane.leftAnchor="200" AnchorPane.topAnchor="30" AnchorPane.rightAnchor="10" AnchorPane.bottomAnchor="10"/>
 </AnchorPane>

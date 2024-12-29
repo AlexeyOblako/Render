@@ -8,7 +8,6 @@ import com.cgvsu.math.Vector3f;
 import com.cgvsu.render_engine.GraphicConveyor;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class ObjWriter {
 
