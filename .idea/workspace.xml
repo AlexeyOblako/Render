@@ -6,9 +6,15 @@
   <component name="ChangeListManager">
     <list default="true" id="cec51d7d-17e3-443a-8bab-359958c22010" name="Changes" comment="1 чел добавлен, вроде частично">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/GuiController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/GuiController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/render_engine/RenderEngine.java" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/render_engine/RenderEngine.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/GuiController.class" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/GuiController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/objreader/ObjReader.class" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/objreader/ObjReader.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/model/Model.class" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/model/Model.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/objreader/ObjReaderException.class" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/objreader/ObjReaderException.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/objwriter/ObjWriterException.class" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/objwriter/ObjWriterException.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/render_engine/Camera.class" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/render_engine/Camera.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/render_engine/RenderEngine.class" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/render_engine/RenderEngine.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/classes/module-info.class" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/classes/module-info.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

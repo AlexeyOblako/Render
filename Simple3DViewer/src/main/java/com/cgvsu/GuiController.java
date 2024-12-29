@@ -1,5 +1,6 @@
 package com.cgvsu;
 
+import com.cgvsu.math.Vector2f;
 import com.cgvsu.math.Vector4f;
 import com.cgvsu.math.matrix.Matrix4f;
 import com.cgvsu.objwriter.ObjWriter;
@@ -16,6 +17,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -34,13 +36,15 @@ import com.cgvsu.model.Model;
 import com.cgvsu.objreader.ObjReader;
 import com.cgvsu.render_engine.Camera;
 
-import javax.vecmath.Point2f;
 
 public class GuiController {
-
+    private double lastMouseX = 0;
+    private double lastMouseY = 0;
+    private boolean isMousePressed = false;
     final private float TRANSLATION = 0.5F;
     final private float SCALE = 0.1F;
     final private float ROTATION = 10F;
+    final private float ZOOM_SENSITIVITY = 0.1F;
     private List<Integer> selectedVertices = new ArrayList<>();
 
 
@@ -68,11 +72,6 @@ public class GuiController {
             1.0F, 1, 0.01F, 100);
 
     private Timeline timeline;
-
-
-    private double lastMouseX = 0;
-    private double lastMouseY = 0;
-    private boolean isMousePressed = false;
 
     /**
      * Рендеринг
@@ -108,15 +107,19 @@ public class GuiController {
         timeline.getKeyFrames().add(frame);
         timeline.play();
 
+        canvas.setOnMousePressed(event -> handleMousePressed1(event));
+        canvas.setOnMouseDragged(event -> handleMouseDragged1(event));
+        canvas.setOnMouseReleased(event -> handleMouseReleased1(event));
+        canvas.setOnKeyPressed(event -> handleKeyPressed(event));
         canvas.setOnMousePressed(event -> handleMousePressed(event));
         canvas.setOnMouseDragged(event -> handleMouseDragged(event));
         canvas.setOnMouseReleased(event -> handleMouseReleased(event));
-        canvas.setOnKeyPressed(event -> handleKeyPressed(event));
+        canvas.setOnScroll(event -> handleMouseScroll(event));
     }
     /**
      * Сохранение позиции мышки при нажатии
      */
-    private void handleMousePressed(MouseEvent event) {
+    private void handleMousePressed1(MouseEvent event) {
         lastMouseX = event.getSceneX();
         lastMouseY = event.getSceneY();
         isMousePressed = true;
@@ -167,13 +170,13 @@ public class GuiController {
             Vector3f vertex = activeModel.vertices.get(i);
 
             Vector4f vertexVecmath = new Vector4f(vertex.getX(), vertex.getY(), vertex.getZ(), 1);
-            Point2f screenPoint = GraphicConveyor.vertexToPoint(
+            Vector2f screenPoint = GraphicConveyor.vertexToPoint(
                     Matrix4f.multiply(modelViewProjectionMatrix, vertexVecmath).normalizeTo3f(),
                     (int) canvas.getWidth(),
                     (int) canvas.getHeight()
             );
 
-            double distance = Math.sqrt(Math.pow(screenPoint.x - mouseX, 2) + Math.pow(screenPoint.y - mouseY, 2));
+            double distance = Math.sqrt(Math.pow(screenPoint.getX() - mouseX, 2) + Math.pow(screenPoint.getY() - mouseY, 2));
 
             if (distance < minDistance) {
                 minDistance = distance;
@@ -190,7 +193,7 @@ public class GuiController {
     /**
      * Фиксация касания мыши и измененин цвета модели
      */
-    private void handleMouseReleased(MouseEvent event) {
+    private void handleMouseReleased1(MouseEvent event) {
         isMousePressed = false;
     }
     @FXML
@@ -466,7 +469,7 @@ public class GuiController {
     }
 
 
-    private void handleMouseDragged(MouseEvent event) {
+    private void handleMouseDragged1(MouseEvent event) {
         float deltaX = (float) (event.getX() - lastMouseX);
         float deltaY = (float) (event.getY() - lastMouseY);
 
@@ -565,6 +568,42 @@ public class GuiController {
                 selectedVertices.clear();
             }
         }
+    }
+    private void handleMousePressed(MouseEvent event) {
+        lastMouseX = event.getSceneX();
+        lastMouseY = event.getSceneY();
+        isMousePressed = true;
+    }
+
+    private void handleMouseDragged(MouseEvent event) {
+        if (isMousePressed) {
+            double deltaX = event.getSceneX() - lastMouseX;
+            double deltaY = event.getSceneY() - lastMouseY;
+
+            // Обновляем вращение камеры в зависимости от движения мыши
+            updateCameraRotation(deltaX, deltaY);
+
+            lastMouseX = event.getSceneX();
+            lastMouseY = event.getSceneY();
+        }
+    }
+
+    private void handleMouseReleased(MouseEvent event) {
+        isMousePressed = false;
+    }
+
+    private void handleMouseScroll(ScrollEvent event) {
+        double deltaY = event.getDeltaY();
+        Vector3f direction = camera.getTarget().deduct(camera.getPosition()).normalize();
+        camera.movePosition(direction.multiply((float) (deltaY * ZOOM_SENSITIVITY)));
+    }
+
+    private void updateCameraRotation(double deltaX, double deltaY) {
+        float sensitivity = 0.1f;//сенса
+        float yaw = (float) (-deltaX * sensitivity);
+        float pitch = (float) (-deltaY * sensitivity);
+
+        camera.rotateAroundTarget(yaw, pitch);
     }
 
 }
