@@ -86,4 +86,36 @@ public class Model {
     public void addPolygon(Polygon polygon) {
         this.polygons.add(polygon);
     }
+
+    public void removeVertices(List<Integer> vertexIndices) {
+        for (int i = vertexIndices.size() - 1; i >= 0; i--) {
+            int vertexIndex = vertexIndices.get(i);
+            removeVertexAndUpdatePolygons(vertexIndex);
+        }
+    }
+    public void removeVertexAndUpdatePolygons(int vertexIndexToRemove) {
+        if (vertexIndexToRemove < 0 || vertexIndexToRemove >= vertices.size()) {
+            throw new IllegalArgumentException("Invalid vertex index to remove");
+        }
+        vertices.remove(vertexIndexToRemove);
+        updatePolygonIndicesAfterVertexRemoval(vertexIndexToRemove);
+    }
+
+    private void updatePolygonIndicesAfterVertexRemoval(int removedVertexIndex) {
+        // Перебор полигонов
+        for (Polygon polygon : polygons) {
+            List<Integer> updatedVertexIndices = new ArrayList<>();
+            for (int vertexIndex : polygon.getVertexIndices()) {
+                if (vertexIndex < removedVertexIndex) {
+                    updatedVertexIndices.add(vertexIndex);
+                } else if (vertexIndex > removedVertexIndex) {
+                    updatedVertexIndices.add(vertexIndex - 1);
+                }
+            }
+
+            polygon.setVertexIndices((ArrayList<Integer>) updatedVertexIndices);
+        }
+
+        polygons.removeIf(polygon -> polygon.getVertexIndices().size() < 3);
+    }
 }

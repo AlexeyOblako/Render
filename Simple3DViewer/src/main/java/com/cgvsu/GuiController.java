@@ -1,6 +1,9 @@
 package com.cgvsu;
 
+import com.cgvsu.math.Vector4f;
+import com.cgvsu.math.matrix.Matrix4f;
 import com.cgvsu.objwriter.ObjWriter;
+import com.cgvsu.render_engine.GraphicConveyor;
 import com.cgvsu.render_engine.RenderEngine;
 import javafx.fxml.FXML;
 import javafx.animation.Animation;
@@ -8,9 +11,13 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ListView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
@@ -19,6 +26,7 @@ import java.nio.file.Path;
 import java.io.IOException;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.cgvsu.math.Vector3f;
 
@@ -26,11 +34,15 @@ import com.cgvsu.model.Model;
 import com.cgvsu.objreader.ObjReader;
 import com.cgvsu.render_engine.Camera;
 
+import javax.vecmath.Point2f;
+
 public class GuiController {
 
     final private float TRANSLATION = 0.5F;
     final private float SCALE = 0.1F;
     final private float ROTATION = 10F;
+    private List<Integer> selectedVertices = new ArrayList<>();
+
 
     @FXML
     AnchorPane anchorPane;
@@ -39,6 +51,10 @@ public class GuiController {
     private Canvas canvas;
 
     private Model mesh = null;
+    @FXML
+    private ColorPicker modelColorPicker;
+
+
 
     @FXML
     private ListView<String> modelListView; // Список моделей
@@ -58,9 +74,12 @@ public class GuiController {
     private double lastMouseY = 0;
     private boolean isMousePressed = false;
 
-
+    /**
+     * Рендеринг
+     */
     @FXML
     private void initialize() {
+        modelColorPicker.setValue(Color.BLACK);
         anchorPane.prefWidthProperty().addListener((ov, oldValue, newValue) -> canvas.setWidth(newValue.doubleValue()));
         anchorPane.prefHeightProperty().addListener((ov, oldValue, newValue) -> canvas.setHeight(newValue.doubleValue()));
 
@@ -79,11 +98,11 @@ public class GuiController {
 
             canvas.getGraphicsContext2D().clearRect(0, 0, width, height);
             camera.setAspectRatio((float) (width / height));
+            Color modelColor = modelColorPicker.getValue();
 
             //Рендеринг всех моделей
-            for (Model model : models) {
-                RenderEngine.render(canvas.getGraphicsContext2D(), camera, model, (int) width, (int) height);
-            }
+            RenderEngine.render(canvas.getGraphicsContext2D(), camera, models, (int) width, (int) height,selectedVertices, modelColor,Color.WHITE);
+
         });
 
         timeline.getKeyFrames().add(frame);
@@ -92,27 +111,97 @@ public class GuiController {
         canvas.setOnMousePressed(event -> handleMousePressed(event));
         canvas.setOnMouseDragged(event -> handleMouseDragged(event));
         canvas.setOnMouseReleased(event -> handleMouseReleased(event));
+        canvas.setOnKeyPressed(event -> handleKeyPressed(event));
     }
-
+    /**
+     * Сохранение позиции мышки при нажатии
+     */
     private void handleMousePressed(MouseEvent event) {
         lastMouseX = event.getSceneX();
         lastMouseY = event.getSceneY();
         isMousePressed = true;
+
+        boolean isShiftPressed = event.isShiftDown();
+
+        double mouseX = event.getX();
+        double mouseY = event.getY();
+
+        Matrix4f modelMatrix = GraphicConveyor.rotateScaleTranslate(
+                models.get(activeModelIndex).getScale().getX(),
+                models.get(activeModelIndex).getScale().getY(),
+                models.get(activeModelIndex).getScale().getZ(),
+                models.get(activeModelIndex).getRotation().getX(),
+                models.get(activeModelIndex).getRotation().getY(),
+                models.get(activeModelIndex).getRotation().getZ(),
+                models.get(activeModelIndex).getTranslation().getX(),
+                models.get(activeModelIndex).getTranslation().getY(),
+                models.get(activeModelIndex).getTranslation().getZ()
+        );
+        Matrix4f viewMatrix = camera.getViewMatrix();
+        Matrix4f projectionMatrix = camera.getProjectionMatrix();
+        Matrix4f modelViewProjectionMatrix = Matrix4f.multiply(projectionMatrix, Matrix4f.multiply(viewMatrix, modelMatrix));
+
+        // ближ верш
+        int closestVertexIndex = findClosestVertex(mouseX, mouseY, modelViewProjectionMatrix);
+
+        if (closestVertexIndex != -1) {
+            if (!isShiftPressed) {
+                selectedVertices.clear();
+                selectedVertices.add(closestVertexIndex);
+            } else {
+                if (!selectedVertices.contains(closestVertexIndex)) {
+                    selectedVertices.add(closestVertexIndex);
+                }
+            }
+        }
     }
 
+    private int findClosestVertex(double mouseX, double mouseY, Matrix4f modelViewProjectionMatrix) {
+        if (activeModelIndex == -1) return -1;
+
+        Model activeModel = models.get(activeModelIndex);
+        double minDistance = Double.MAX_VALUE;
+        int closestVertexIndex = -1;
+
+        for (int i = 0; i < activeModel.vertices.size(); i++) {
+            Vector3f vertex = activeModel.vertices.get(i);
+
+            Vector4f vertexVecmath = new Vector4f(vertex.getX(), vertex.getY(), vertex.getZ(), 1);
+            Point2f screenPoint = GraphicConveyor.vertexToPoint(
+                    Matrix4f.multiply(modelViewProjectionMatrix, vertexVecmath).normalizeTo3f(),
+                    (int) canvas.getWidth(),
+                    (int) canvas.getHeight()
+            );
+
+            double distance = Math.sqrt(Math.pow(screenPoint.x - mouseX, 2) + Math.pow(screenPoint.y - mouseY, 2));
+
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestVertexIndex = i;
+            }
+        }
+
+        return closestVertexIndex;
+    }
+
+
+
+
+    /**
+     * Фиксация касания мыши и измененин цвета модели
+     */
     private void handleMouseReleased(MouseEvent event) {
         isMousePressed = false;
     }
-    private void updateCameraRotation(double deltaX, double deltaY) {
-        float sensitivity = 0.1f; // Чувствительность мыши
-        float yaw = (float) (-deltaX * sensitivity); // Инвертируем направление вращения по горизонтали
-        float pitch = (float) (-deltaY * sensitivity);
-        float roll = (float) (deltaY * sensitivity);
-
-// Обновляем углы вращения камеры
-        camera.rotateAroundTarget(yaw, pitch, roll);
+    @FXML
+    private void handleModelColorChange(ActionEvent event) {
+        Color color = modelColorPicker.getValue();
+        canvas.getGraphicsContext2D().setStroke(color);
     }
 
+    /**
+     * Открытие меню для загрузки 3д модели
+     */
     @FXML
     private void onOpenModelMenuItemClick() {
         FileChooser fileChooser = new FileChooser();
@@ -137,10 +226,15 @@ public class GuiController {
             setActiveModel(models.size() - 1); // Установка новой модели как активной
         } catch (IOException exception) {
             System.out.println("Ошибка загрузки модели: " + exception.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
 
+    /**
+     * Сохранение оригинальной модели в файл
+     */
     @FXML
     private void onSaveOriginalModelMenuItemClick() {
         if (mesh == null) {
@@ -167,17 +261,28 @@ public class GuiController {
         }
     }
 
+    /**
+     * Сохранение измененной модели
+     */
     @FXML
     private void onSaveTransformedModelMenuItemClick() {
-        if (mesh == null) {
-
-            return;
+        if (activeModelIndex != -1) {
+            Model activeModel = models.get(activeModelIndex);
+            saveModel(activeModel, true);
+        } else {
+            System.out.println("Нет активной модели для сохранения");
         }
+    }
+
+    /**
+     *  Метод для сохранения модели
+     */
+    private void saveModel(Model model, boolean applyTransformations) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
-        fileChooser.setTitle("Save Transformed Model");
+        fileChooser.setTitle("Save Model");
 
-        File file = fileChooser.showSaveDialog((Stage) canvas.getScene().getWindow());
+        File file = fileChooser.showSaveDialog((anchorPane.getScene().getWindow()));
         if (file == null) {
             return;
         }
@@ -185,14 +290,17 @@ public class GuiController {
         Path fileName = Path.of(file.getAbsolutePath());
 
         try {
-
-            String transformedModelContent = ObjWriter.write(mesh);
-            Files.writeString(fileName, transformedModelContent);
+            String modelContent = ObjWriter.write(model, applyTransformations);
+            Files.writeString(fileName, modelContent);
+            System.out.println("Модель сохранена: " + fileName);
         } catch (IOException exception) {
-
+            System.out.println("Ошибка сохранения модели: " + exception.getMessage());
         }
     }
 
+    /**
+     * Тут математики мудрили, работа с камерой
+     */
     @FXML
     public void handleCameraForward(ActionEvent actionEvent) {
         camera.movePositionAndTarget(new Vector3f(0, 0, -TRANSLATION));
@@ -365,16 +473,16 @@ public class GuiController {
         Vector3f position = camera.getPosition();
         Vector3f target = camera.getTarget();
 
-        // Calculate the direction from the camera position to the target
+        //Процесс нахождения вектора направления от позиции камеры к определенной цели
         Vector3f direction = target.deduct(position).normalize();
 
-        // Calculate the right vector
+        // Вычисляем правый вектор
         Vector3f right = Vector3f.crossProduct(direction, new Vector3f(0, 1, 0)).normalize();
 
-        // Calculate the up vector
+        // Вычисляем верхний вектор
         Vector3f up = Vector3f.crossProduct(right, direction).normalize();
 
-        // Update the target based on mouse movement
+        // Обновляем положение мыши
         target = Vector3f.add(target, right.multiply(deltaX * 0.01f));
         target = Vector3f.add(target, up.multiply(deltaY * 0.01f));
 
@@ -384,7 +492,9 @@ public class GuiController {
         lastMouseY = event.getY();
     }
 
-
+    /**
+     * Удаление модели из списка
+     */
     @FXML
     private void onRemoveModelButtonClick() {
         if (activeModelIndex != -1) {
@@ -394,18 +504,20 @@ public class GuiController {
 
             // Сбрасываем активную модель
             if (models.isEmpty()) {
-                mesh = null; // Если список пуст, сбрасываем mesh
-                activeModelIndex = -1; // Сбрасываем индекс активной модели
+                mesh = null;
+                activeModelIndex = -1;
                 System.out.println("Все модели удалены");
             } else {
-                // Устанавливаем новую активную модель, если есть
-                setActiveModel(Math.max(0, activeModelIndex - 1)); // Устанавливаем предыдущую модель
+                setActiveModel(Math.max(0, activeModelIndex - 1));
             }
         } else {
             System.out.println("Нет активной модели для удаления");
         }
     }
 
+    /**
+     * Обновление списка моделей(для интерфейса)
+     */
     private void updateModelList() {
         modelListView.getItems().clear();
         for (Model model : models) {
@@ -413,6 +525,9 @@ public class GuiController {
         }
     }
 
+    /**
+     * Установка активной модели
+     */
     private void setActiveModel(int index) {
         if (index >= 0 && index < models.size()) {
             activeModelIndex = index;
@@ -420,8 +535,36 @@ public class GuiController {
             System.out.println("Активная модель: " + mesh.getName());
         } else {
             activeModelIndex = -1;
-            mesh = null; // Сбрасываем mesh, если нет активной модели
+            mesh = null;
             System.out.println("Нет активной модели");
         }
     }
+
+    /**
+     * Удаление по нажатию кнопки
+     */
+    @FXML
+    private void handleRemoveVerticesButtonClick(ActionEvent event) {
+        if (activeModelIndex != -1) {
+            Model activeModel = models.get(activeModelIndex);
+            for (int vertexIndex : selectedVertices) {
+                activeModel.removeVertexAndUpdatePolygons(vertexIndex);
+            }
+            selectedVertices.clear();
+        }
+    }
+
+    /**
+     * Нажатие кнопки
+     */
+    private void handleKeyPressed(KeyEvent event) {
+        if (event.getCode() == KeyCode.DELETE) {
+            if (activeModelIndex != -1) {
+                Model activeModel = models.get(activeModelIndex);
+                activeModel.removeVertices(selectedVertices);
+                selectedVertices.clear();
+            }
+        }
+    }
+
 }

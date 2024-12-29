@@ -10,279 +10,289 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 public class ObjReader {
-	// Константы для токенов, используемых в формате OBJ
 	private static final String OBJ_VERTEX_TOKEN = "v";
 	private static final String OBJ_TEXTURE_TOKEN = "vt";
 	private static final String OBJ_NORMAL_TOKEN = "vn";
 	private static final String OBJ_FACE_TOKEN = "f";
 
-	// Основной метод для чтения и парсинга файла OBJ
-	public static Model read(String fileContent) {
+	/**
+	 * Читает содержимое файла OBJ и создает объект Model.
+	 *
+	 * @param fileContent содержимое файла OBJ в виде строки
+	 * @return объект Model, представляющий данные OBJ
+	 * @throws Exception если возникает ошибка при чтении файла
+	 */
+	public static Model read(String fileContent) throws Exception {
 		Model result = new Model();
-
 		int lineInd = 0;
 		Scanner scanner = new Scanner(fileContent);
+
 		while (scanner.hasNextLine()) {
-			final String line = scanner.nextLine();
-			ArrayList<String> wordsInLine = new ArrayList<String>(Arrays.asList(line.split("\\s+")));
-			if (wordsInLine.isEmpty()) {
-				continue;
-			}
+			String line = scanner.nextLine();
+			ArrayList<String> wordsInLine = new ArrayList<>(Arrays.asList(line.split("\\s+")));
+			if (wordsInLine.isEmpty()) continue;
 
-			final String token = wordsInLine.get(0);
-			wordsInLine.remove(0);
+			String token = wordsInLine.remove(0);
+			lineInd++;
 
-			++lineInd;
 			switch (token) {
-				// Парсинг вершин
+				//Если совпадают токены, то мы вызываем методы parse, передавая строке значения
 				case OBJ_VERTEX_TOKEN -> result.vertices.add(parseVertex(wordsInLine, lineInd));
-				// Парсинг текстурных вершин
 				case OBJ_TEXTURE_TOKEN -> result.textureVertices.add(parseTextureVertex(wordsInLine, lineInd));
-				// Парсинг нормалей
 				case OBJ_NORMAL_TOKEN -> result.normals.add(parseNormal(wordsInLine, lineInd));
-				// Парсинг полигонов
 				case OBJ_FACE_TOKEN -> {
 					result.polygons.add(parseFace(wordsInLine, lineInd));
-					// Проверка на соответствие текстурных вершин в полигонах
-					if (result.polygons.size() > 1 &&
-							(result.polygons.get(result.polygons.size() - 2).getTextureVertexIndices().size() == 0) !=
-									(result.polygons.get(result.polygons.size() - 1).getTextureVertexIndices().size() == 0))
-					{
-						throw new ObjReaderException("Polygon has no texture vertices.", lineInd);
-					}
+					ensureTextureConsistency(result.polygons, lineInd);
 				}
 				default -> {}
 			}
 		}
 
-		// Проверка на наличие хотя бы одного полигона
-		if (result.polygons.size() == 0) {
-			throw new ObjReaderException("OBJ has not any polygons", lineInd);
-		}
 
-		// Проверка на наличие хотя бы одной вершины
-		if (result.vertices.size() == 0) {
-			throw new ObjReaderException("OBJ has not any vertices", lineInd);
-		}
-
-		// Проверка индексов вершин, нормалей и текстурных вершин в полигонах
-		for (Polygon list : result.polygons) {
-			int vertexIndicesSize = result.vertices.size();
-			int normalIndicesSize = result.normals.size();
-			int textureIndicesSize = result.textureVertices.size();
-
-			for (int i = 0; i < 3; i++) {
-				int vertexIndex = list.getVertexIndices().get(i);
-				// Преобразование отрицательных индексов в положительные
-				if (vertexIndex < 0) {
-					list.getVertexIndices().set(i, result.vertices.size() + 1 + vertexIndex);
-					vertexIndex = list.getVertexIndices().get(i);
-				}
-				// Проверка на выход индекса за пределы допустимых значений
-				if (vertexIndex >= result.vertices.size() || vertexIndex < 0) {
-					throw new ObjReaderException("The polygon is specified incorrectly: vertex index out of bounds.",
-							findLineInObj(
-									scanner,
-									OBJ_VERTEX_TOKEN,
-									vertexIndicesSize));
-				}
-			}
-
-			// Проверка индексов нормалей
-			if (list.getNormalIndices().size() != 0) {
-				for (int i = 0; i < 3; i++) {
-					int normalIndex = list.getNormalIndices().get(i);
-					if (normalIndex < 0) {
-						list.getNormalIndices().set(i, result.normals.size() + 1 + normalIndex);
-						normalIndex = list.getNormalIndices().get(i);
-					}
-					if (normalIndex >= result.normals.size() || normalIndex < 0) {
-						throw new ObjReaderException("The polygon is specified incorrectly: normal index out of bounds.",
-								findLineInObj(
-										scanner,
-										OBJ_NORMAL_TOKEN,
-										normalIndicesSize));
-					}
-				}
-			}
-
-			// Проверка индексов текстурных вершин
-			if (list.getTextureVertexIndices().size() != 0) {
-				for (int i = 0; i < 3; i++) {
-					int textureIndex = list.getTextureVertexIndices().get(i);
-					if (textureIndex < 0) {
-						list.getTextureVertexIndices().set(i, result.textureVertices.size() + 1 + textureIndex);
-						textureIndex = list.getTextureVertexIndices().get(i);
-					}
-					if (textureIndex >= result.textureVertices.size() || textureIndex < 0) {
-						throw new ObjReaderException("The polygon is specified incorrectly: texture index out of bounds.",
-								findLineInObj(
-										scanner,
-										OBJ_TEXTURE_TOKEN,
-										textureIndicesSize));
-					}
-				}
-			}
-		}
-
+		validateModel(result, lineInd);
+		resolveIndices(result);
 		return result;
 	}
 
-	// Метод для парсинга вершин
-	protected static Vector3f parseVertex(final ArrayList<String> wordsInLineWithoutToken, int lineInd) {
-		try {
-			// Проверка на слишком много аргументов
-			if (wordsInLineWithoutToken.size() > 3) {
-				throw new ObjReaderException("Too much vertex arguments.", lineInd);
-			}
-
-			return new Vector3f(
-					Float.parseFloat(wordsInLineWithoutToken.get(0)),
-					Float.parseFloat(wordsInLineWithoutToken.get(1)),
-					Float.parseFloat(wordsInLineWithoutToken.get(2)));
-
-		} catch(NumberFormatException e) {
-			throw new ObjReaderException("Failed to parse float value.", lineInd);
-
-		} catch(IndexOutOfBoundsException e) {
-			throw new ObjReaderException("Too few vertex arguments.", lineInd);
-		}
+	/**
+	 * Парсит строку, представляющую вершину, и возвращает объект Vector3f.
+	 *
+	 * @param words   список строковых значений
+	 * @param lineInd номер строки для обработки
+	 * @return объект Vector3f, представляющий вершину
+	 */
+	static Vector3f parseVertex(ArrayList<String> words, int lineInd) {
+		validateArgumentCount(words, 3, "vertex", lineInd);
+		return new Vector3f(
+				parseFloat(words.get(0), lineInd),
+				parseFloat(words.get(1), lineInd),
+				parseFloat(words.get(2), lineInd)
+		);
 	}
 
-	// Метод для парсинга текстурных вершин
-	protected static Vector2f parseTextureVertex(final ArrayList<String> wordsInLineWithoutToken, int lineInd) {
-		try {
-			// Проверка на слишком много аргументов
-			if (wordsInLineWithoutToken.size() > 2) {
-				throw new ObjReaderException("Too much texture vertex arguments.", lineInd);
-			}
-			return new Vector2f(
-					Float.parseFloat(wordsInLineWithoutToken.get(0)),
-					Float.parseFloat(wordsInLineWithoutToken.get(1)));
-
-		} catch(NumberFormatException e) {
-			throw new ObjReaderException("Failed to parse float value.", lineInd);
-
-		} catch(IndexOutOfBoundsException e) {
-			throw new ObjReaderException("Too few texture vertex arguments.", lineInd);
-		}
+	/**
+	 * Парсит строку, представляющую текстурную вершину, и возвращает объект Vector2f.
+	 *
+	 * @param words   список строковых значений
+	 * @param lineInd номер строки для обработки
+	 * @return объект Vector2f, представляющий текстурную вершину
+	 */
+	static Vector2f parseTextureVertex(ArrayList<String> words, int lineInd) {
+		validateArgumentCount(words, 2, "texture vertex", lineInd);
+		return new Vector2f(
+				parseFloat(words.get(0), lineInd),
+				parseFloat(words.get(1), lineInd)
+		);
 	}
 
-	// Метод для парсинга нормалей
-	protected static Vector3f parseNormal(final ArrayList<String> wordsInLineWithoutToken, int lineInd) {
-		try {
-			// Проверка на слишком много аргументов
-			if (wordsInLineWithoutToken.size() > 3) {
-				throw new ObjReaderException("Too much normal arguments.", lineInd);
-			}
-			return new Vector3f(
-					Float.parseFloat(wordsInLineWithoutToken.get(0)),
-					Float.parseFloat(wordsInLineWithoutToken.get(1)),
-					Float.parseFloat(wordsInLineWithoutToken.get(2)));
-
-		} catch(NumberFormatException e) {
-			throw new ObjReaderException("Failed to parse float value.", lineInd);
-
-		} catch(IndexOutOfBoundsException e) {
-			throw new ObjReaderException("Too few normal arguments.", lineInd);
-		}
+	/**
+	 * Парсит строку, представляющую нормаль, и возвращает объект Vector3f.
+	 *
+	 * @param words   список строковых значений
+	 * @param lineInd номер строки для обработки
+	 * @return объект Vector3f, представляющий нормаль
+	 */
+	static Vector3f parseNormal(ArrayList<String> words, int lineInd) {
+		validateArgumentCount(words, 3, "normal", lineInd);
+		return new Vector3f(
+				parseFloat(words.get(0), lineInd),
+				parseFloat(words.get(1), lineInd),
+				parseFloat(words.get(2), lineInd)
+		);
 	}
 
-	// Метод для парсинга полигонов
-	protected static Polygon parseFace(final ArrayList<String> wordsInLineWithoutToken, int lineInd) {
-		if (wordsInLineWithoutToken.size() < 3) {
-			throw new ObjReaderException("Polygon has too few vertices.", lineInd);
-		}
-		ArrayList<Integer> onePolygonVertexIndices = new ArrayList<Integer>();
-		ArrayList<Integer> onePolygonTextureVertexIndices = new ArrayList<Integer>();
-		ArrayList<Integer> onePolygonNormalIndices = new ArrayList<Integer>();
-
-		for (String s : wordsInLineWithoutToken) {
-			parseFaceWord(s, onePolygonVertexIndices, onePolygonTextureVertexIndices, onePolygonNormalIndices, lineInd);
-		}
-
-		// Проверка на дублирование индексов вершин в полигоне
-		if (findEqualites(onePolygonVertexIndices)) {
-			throw new ObjReaderException("The polygon can`t contain the same vertex indices", lineInd);
+	/**
+	 * Парсит строку, представляющую полигон, и возвращает объект Polygon.
+	 *
+	 * @param stroka   список строковых значений
+	 * @param lineInd номер строки для обработки
+	 * @return объект Polygon, представляющий полигон
+	 */
+	static Polygon parseFace(ArrayList<String> stroka, int lineInd) {
+		if (stroka.size() < 3) {
+			throw ObjReaderException.tooFewArguments("polygon", lineInd);
 		}
 
-		Polygon result = new Polygon();
-		result.setVertexIndices(onePolygonVertexIndices);
-		result.setTextureVertexIndices(onePolygonTextureVertexIndices);
-		result.setNormalIndices(onePolygonNormalIndices);
-		return result;
+		ArrayList<Integer> vertexIndices = new ArrayList<>();
+		ArrayList<Integer> textureIndices = new ArrayList<>();
+		ArrayList<Integer> normalIndices = new ArrayList<>();
+
+		for (String strok : stroka) {
+			parseFaceWord(strok, vertexIndices, textureIndices, normalIndices, lineInd);
+		}
+
+		if (hasDuplicates(vertexIndices)) {
+			throw ObjReaderException.duplicateVertexIndex(lineInd);
+		}
+
+		Polygon polygon = new Polygon();
+		polygon.setVertexIndices(vertexIndices);
+		polygon.setTextureVertexIndices(textureIndices);
+		polygon.setNormalIndices(normalIndices);
+		return polygon;
 	}
 
-	// Метод для парсинга отдельных слов в строках полигонов
-	protected static void parseFaceWord(
-			String wordInLine,
-			ArrayList<Integer> onePolygonVertexIndices,
-			ArrayList<Integer> onePolygonTextureVertexIndices,
-			ArrayList<Integer> onePolygonNormalIndices,
+	/**
+	 * Парсит отдельное слово из полигона и добавляет индексы в соответствующие списки.
+	 *
+	 * @param stroka            строка, представляющая элемент полигона
+	 * @param vertexIndices   список индексов вершин
+	 * @param textureIndices  список индексов текстур
+	 * @param normalIndices   список индексов нормалей
+	 * @param lineInd        номер строки для обработки
+	 */
+	private static void parseFaceWord(
+			String stroka,
+			ArrayList<Integer> vertexIndices,
+			ArrayList<Integer> textureIndices,
+			ArrayList<Integer> normalIndices,
 			int lineInd) {
-		try {
-			String[] wordIndices = wordInLine.split("/");
-			switch (wordIndices.length) {
-				case 1 -> {
-					onePolygonVertexIndices.add(Integer.parseInt(wordIndices[0]) - 1);
-				}
-				case 2 -> {
-					onePolygonVertexIndices.add(Integer.parseInt(wordIndices[0]) - 1);
-					onePolygonTextureVertexIndices.add(Integer.parseInt(wordIndices[1]) - 1);
-				}
-				case 3 -> {
-					onePolygonVertexIndices.add(Integer.parseInt(wordIndices[0]) - 1);
-					onePolygonNormalIndices.add(Integer.parseInt(wordIndices[2]) - 1);
-					if (!wordIndices[1].equals("")) {
-						onePolygonTextureVertexIndices.add(Integer.parseInt(wordIndices[1]) - 1);
-					}
-				}
-				default -> {
-					throw new ObjReaderException("Invalid element size.", lineInd);
-				}
+		String[] parts = stroka.split("/");
+		switch (parts.length) {
+			case 1 -> vertexIndices.add(parseIndex(parts[0], lineInd));
+			case 2 -> {
+				vertexIndices.add(parseIndex(parts[0], lineInd));
+				textureIndices.add(parseIndex(parts[1], lineInd));
 			}
-
-		} catch(NumberFormatException e) {
-			throw new ObjReaderException("Failed to parse int value.", lineInd);
-
-		} catch(IndexOutOfBoundsException e) {
-			throw new ObjReaderException("Too few arguments.", lineInd);
+			case 3 -> {
+				vertexIndices.add(parseIndex(parts[0], lineInd));
+				if (!parts[1].isEmpty()) {
+					textureIndices.add(parseIndex(parts[1], lineInd));
+				}
+				normalIndices.add(parseIndex(parts[2], lineInd));
+			}
+			default -> throw ObjReaderException.invalidElementSize(lineInd);
 		}
 	}
 
-	// Метод для поиска строки в файле OBJ по токену и индексу
-	protected static int findLineInObj(Scanner scanner, String token, Integer indexInPolygon){
-		int lineInd = 0;
-		int rows = 1;
-		while (scanner.hasNextLine()) {
-			lineInd++;
-			final String line = scanner.nextLine();
-			ArrayList<String> wordsInLine = new ArrayList<String>(Arrays.asList(line.split("\\s+")));
-			if (wordsInLine.isEmpty()) {
-				continue;
-			}
-
-			final String trueToken = wordsInLine.get(0);
-			wordsInLine.remove(0);
-
-			if (token.equals(trueToken)) {
-				if (rows != indexInPolygon) {
-					rows++;
-				} else {
-					return lineInd;
-				}
-			}
+	/**
+	 * Проверяет количество аргументов в строке.
+	 *
+	 * @param stroka        список строковых значений
+	 * @param expected     ожидаемое количество аргументов
+	 * @param element      имя элемента (вершина, текстурная вершина и т.д.)
+	 * @param lineInd      номер строки для обработки
+	 */
+	private static void validateArgumentCount(ArrayList<String> stroka, int expected, String element, int lineInd) {
+		if (stroka.size() > expected) {
+			throw ObjReaderException.tooManyArguments(element, lineInd);
 		}
-		return -1;
+		if (stroka.size() < expected) {
+			throw ObjReaderException.tooFewArguments(element, lineInd);
+		}
 	}
 
-	// Метод для проверки на дублирование индексов вершин в полигоне
-	protected static boolean findEqualites(ArrayList<Integer> onePolygonVertexIndices) {
-		for (int i = 0; i < onePolygonVertexIndices.size() - 1; i++) {
-			for (int j = i + 1; j < onePolygonVertexIndices.size(); j++) {
-				if (onePolygonVertexIndices.get(i) == onePolygonVertexIndices.get(j)) return true;
+	/**
+	 * Проверяет согласованность текстур в полигонах.
+	 *
+	 * @param polygons список полигонов
+	 * @param lineInd  номер строки для обработки
+	 * @throws Exception если возникает ошибка
+	 */
+	private static void ensureTextureConsistency(ArrayList<Polygon> polygons, int lineInd) throws Exception {
+		if (polygons.size() < 2) return;
+
+		boolean lastHasTexture = !polygons.get(polygons.size() - 1).getTextureVertexIndices().isEmpty();
+		boolean secondLastHasTexture = !polygons.get(polygons.size() - 2).getTextureVertexIndices().isEmpty();
+
+		if (lastHasTexture != secondLastHasTexture) {
+			throw ObjReaderException.textureInconsistency(lineInd);
+		}
+	}
+
+	/**
+	 * Проверяет модель на наличие вершин и полигонов.
+	 *
+	 * @param model  объект Model для проверки
+	 * @param lineInd номер строки для обработки
+	 */
+	private static void validateModel(Model model, int lineInd) {
+		if (model.vertices.isEmpty()) {
+			throw ObjReaderException.noVerticesFound(lineInd);
+		}
+		if (model.polygons.isEmpty()) {
+			throw ObjReaderException.noPolygonsFound(lineInd);
+		}
+	}
+
+	/**
+	 * Разрешает индексы в модели.
+	 *
+	 * @param model объект Model для обработки
+	 * @throws Exception если возникает ошибка
+	 */
+	private static void resolveIndices(Model model) throws Exception {
+		for (Polygon polygon : model.polygons) {
+			resolvePolygonIndices(polygon.getVertexIndices(), model.vertices.size());
+			resolvePolygonIndices(polygon.getTextureVertexIndices(), model.textureVertices.size());
+			resolvePolygonIndices(polygon.getNormalIndices(), model.normals.size());
+		}
+	}
+
+	/**
+	 * Разрешает индексы полигона.
+	 *
+	 * @param indices список индексов для обработки
+	 * @param size    размер списка вершин, текстур или нормалей
+	 * @throws Exception если индекс выходит за пределы
+	 */
+	private static void resolvePolygonIndices(ArrayList<Integer> indices, int size) throws Exception {
+		for (int i = 0; i < indices.size(); i++) {
+			int index = indices.get(i);
+			if (index < 0) {
+				indices.set(i, size + index);
+			}
+			if (indices.get(i) < 0 || indices.get(i) >= size) {
+				throw ObjReaderException.indexOutOfBounds();
+			}
+		}
+	}
+
+	/**
+	 * Проверяет наличие дубликатов в списке индексов.
+	 *
+	 * @param indices список индексов для проверки
+	 * @return true, если дубликаты найдены, иначе false
+	 */
+	private static boolean hasDuplicates(ArrayList<Integer> indices) {
+		for (int i = 0; i < indices.size() - 1; i++) {
+			for (int j = i + 1; j < indices.size(); j++) {
+				if (indices.get(i).equals(indices.get(j))) {
+					return true;
+				}
 			}
 		}
 		return false;
 	}
+
+	/**
+	 * Парсит строку в индекс вершины.
+	 *
+	 * @param value   строковое значение индекса
+	 * @param lineInd номер строки для обработки
+	 * @return индекс вершины
+	 */
+	private static int parseIndex(String value, int lineInd) {
+		try {
+			return Integer.parseInt(value) - 1;
+		} catch (NumberFormatException e) {
+			throw ObjReaderException.parseFailed("int", lineInd);
+		}
+	}
+
+	/**
+	 * Парсит строку в значение с плавающей запятой.
+	 *
+	 * @param value   строковое значение
+	 * @param lineInd номер строки для обработки
+	 * @return значение с плавающей запятой
+	 */
+	private static float parseFloat(String value, int lineInd) {
+		try {
+			return Float.parseFloat(value);
+		} catch (NumberFormatException e) {
+			throw ObjReaderException.parseFailed("float", lineInd);
+		}
+	}
 }
+
