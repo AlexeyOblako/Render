@@ -4,13 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cec51d7d-17e3-443a-8bab-359958c22010" name="Changes" comment="Матан есть">
-      <change afterPath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/objwriter/ObjWriter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/objwriter/ObjWriterException.java" afterDir="false" />
+    <list default="true" id="cec51d7d-17e3-443a-8bab-359958c22010" name="Changes" comment="1 чел добавлен, вроде частично">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/GuiController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/GuiController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/objreader/ObjReader.java" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/objreader/ObjReader.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/objreader/ObjReaderException.java" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/objreader/ObjReaderException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/GuiController.class" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/GuiController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/objreader/ObjReader.class" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/objreader/ObjReader.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/objreader/ObjReaderException.class" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/objreader/ObjReaderException.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,7 +23,13 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="UPDATE_TYPE" value="REBASE" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
@@ -167,7 +171,15 @@
       <option name="project" value="LOCAL" />
       <updated>1733865144529</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="1 чел добавлен, вроде частично">
+      <option name="closed" value="true" />
+      <created>1735489527792</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1735489527792</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -175,6 +187,7 @@
     <MESSAGE value="Добавил wasd нормальные, осталось мышку." />
     <MESSAGE value="Вроде всё, осталось тесты добавить." />
     <MESSAGE value="Матан есть" />
-    <option name="LAST_COMMIT_MESSAGE" value="Матан есть" />
+    <MESSAGE value="1 чел добавлен, вроде частично" />
+    <option name="LAST_COMMIT_MESSAGE" value="1 чел добавлен, вроде частично" />
   </component>
 </project>
