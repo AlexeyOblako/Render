@@ -1,5 +1,6 @@
 package com.cgvsu;
 
+import com.cgvsu.objwriter.ObjWriter;
 import com.cgvsu.render_engine.RenderEngine;
 import javafx.fxml.FXML;
 import javafx.animation.Animation;
@@ -7,17 +8,17 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.io.IOException;
 import java.io.File;
+import java.util.ArrayList;
 
 import com.cgvsu.math.Vector3f;
 
@@ -26,34 +27,49 @@ import com.cgvsu.objreader.ObjReader;
 import com.cgvsu.render_engine.Camera;
 
 public class GuiController {
-    private double lastMouseX = 0;
-    private double lastMouseY = 0;
-    private boolean isMousePressed = false;
+
     final private float TRANSLATION = 0.5F;
     final private float SCALE = 0.1F;
     final private float ROTATION = 10F;
-    final private float ZOOM_SENSITIVITY = 0.1F;
 
     @FXML
-    public AnchorPane anchorPane;
+    AnchorPane anchorPane;
 
     @FXML
-    public Canvas canvas;
+    private Canvas canvas;
 
-    public Model mesh = null;
+    private Model mesh = null;
 
-    public Camera camera = new Camera(
+    @FXML
+    private ListView<String> modelListView; // Список моделей
+    private ArrayList<Model> models = new ArrayList<>(); // Список моделей
+    private int activeModelIndex = -1; // Индекс активной модели
+
+
+    private Camera camera = new Camera(
             new Vector3f(0, 0, 100),
             new Vector3f(0, 0, 0),
             1.0F, 1, 0.01F, 100);
 
-    public Timeline timeline;
+    private Timeline timeline;
+
+
+    private double lastMouseX = 0;
+    private double lastMouseY = 0;
+    private boolean isMousePressed = false;
+
 
     @FXML
-    public void initialize() {
+    private void initialize() {
         anchorPane.prefWidthProperty().addListener((ov, oldValue, newValue) -> canvas.setWidth(newValue.doubleValue()));
         anchorPane.prefHeightProperty().addListener((ov, oldValue, newValue) -> canvas.setHeight(newValue.doubleValue()));
 
+        // Инициализация списка моделей
+        modelListView.getSelectionModel().selectedIndexProperty().addListener((obs, oldVal, newVal) -> {
+            setActiveModel(newVal.intValue());
+        });
+
+        // Инициализация таймлайна для рендеринга
         timeline = new Timeline();
         timeline.setCycleCount(Animation.INDEFINITE);
 
@@ -64,8 +80,9 @@ public class GuiController {
             canvas.getGraphicsContext2D().clearRect(0, 0, width, height);
             camera.setAspectRatio((float) (width / height));
 
-            if (mesh != null) {
-                RenderEngine.render(canvas.getGraphicsContext2D(), camera, mesh, (int) width, (int) height);
+            //Рендеринг всех моделей
+            for (Model model : models) {
+                RenderEngine.render(canvas.getGraphicsContext2D(), camera, model, (int) width, (int) height);
             }
         });
 
@@ -75,7 +92,25 @@ public class GuiController {
         canvas.setOnMousePressed(event -> handleMousePressed(event));
         canvas.setOnMouseDragged(event -> handleMouseDragged(event));
         canvas.setOnMouseReleased(event -> handleMouseReleased(event));
-        canvas.setOnScroll(event -> handleMouseScroll(event));
+    }
+
+    private void handleMousePressed(MouseEvent event) {
+        lastMouseX = event.getSceneX();
+        lastMouseY = event.getSceneY();
+        isMousePressed = true;
+    }
+
+    private void handleMouseReleased(MouseEvent event) {
+        isMousePressed = false;
+    }
+    private void updateCameraRotation(double deltaX, double deltaY) {
+        float sensitivity = 0.1f; // Чувствительность мыши
+        float yaw = (float) (-deltaX * sensitivity); // Инвертируем направление вращения по горизонтали
+        float pitch = (float) (-deltaY * sensitivity);
+        float roll = (float) (deltaY * sensitivity);
+
+// Обновляем углы вращения камеры
+        camera.rotateAroundTarget(yaw, pitch, roll);
     }
 
     @FXML
@@ -84,23 +119,27 @@ public class GuiController {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
         fileChooser.setTitle("Load Model");
 
-        File file = fileChooser.showOpenDialog((Stage) canvas.getScene().getWindow());
+        File file = fileChooser.showOpenDialog((anchorPane.getScene().getWindow()));
         if (file == null) {
             return;
         }
+
 
         Path fileName = Path.of(file.getAbsolutePath());
 
         try {
             String fileContent = Files.readString(fileName);
-            mesh = ObjReader.read(fileContent);
 
-            mesh.resetTransformations();
-
+            Model newModel = ObjReader.read(fileContent);
+            newModel.setName(file.getName()); // Установка имени модели
+            models.add(newModel);
+            updateModelList();
+            setActiveModel(models.size() - 1); // Установка новой модели как активной
         } catch (IOException exception) {
-
+            System.out.println("Ошибка загрузки модели: " + exception.getMessage());
         }
     }
+
 
     @FXML
     private void onSaveOriginalModelMenuItemClick() {
@@ -156,14 +195,12 @@ public class GuiController {
 
     @FXML
     public void handleCameraForward(ActionEvent actionEvent) {
-        Vector3f direction = camera.getTarget().deduct(camera.getPosition()).normalize();
-        camera.movePosition(direction.multiply(TRANSLATION));
+        camera.movePositionAndTarget(new Vector3f(0, 0, -TRANSLATION));
     }
 
     @FXML
     public void handleCameraBackward(ActionEvent actionEvent) {
-        Vector3f direction = camera.getTarget().deduct(camera.getPosition()).normalize();
-        camera.movePosition(direction.multiply(-TRANSLATION));
+        camera.movePositionAndTarget(new Vector3f(0, 0, TRANSLATION));
     }
 
     @FXML
@@ -320,40 +357,71 @@ public class GuiController {
         }
     }
 
-    private void handleMousePressed(MouseEvent event) {
-        lastMouseX = event.getSceneX();
-        lastMouseY = event.getSceneY();
-        isMousePressed = true;
-    }
 
     private void handleMouseDragged(MouseEvent event) {
-        if (isMousePressed) {
-            double deltaX = event.getSceneX() - lastMouseX;
-            double deltaY = event.getSceneY() - lastMouseY;
+        float deltaX = (float) (event.getX() - lastMouseX);
+        float deltaY = (float) (event.getY() - lastMouseY);
 
-            // Обновляем вращение камеры в зависимости от движения мыши
-            updateCameraRotation(deltaX, deltaY);
+        Vector3f position = camera.getPosition();
+        Vector3f target = camera.getTarget();
 
-            lastMouseX = event.getSceneX();
-            lastMouseY = event.getSceneY();
+        // Calculate the direction from the camera position to the target
+        Vector3f direction = target.deduct(position).normalize();
+
+        // Calculate the right vector
+        Vector3f right = Vector3f.crossProduct(direction, new Vector3f(0, 1, 0)).normalize();
+
+        // Calculate the up vector
+        Vector3f up = Vector3f.crossProduct(right, direction).normalize();
+
+        // Update the target based on mouse movement
+        target = Vector3f.add(target, right.multiply(deltaX * 0.01f));
+        target = Vector3f.add(target, up.multiply(deltaY * 0.01f));
+
+        camera.setTarget(target);
+
+        lastMouseX = event.getX();
+        lastMouseY = event.getY();
+    }
+
+
+    @FXML
+    private void onRemoveModelButtonClick() {
+        if (activeModelIndex != -1) {
+            // Удаляем модель из списка
+            models.remove(activeModelIndex);
+            updateModelList();
+
+            // Сбрасываем активную модель
+            if (models.isEmpty()) {
+                mesh = null; // Если список пуст, сбрасываем mesh
+                activeModelIndex = -1; // Сбрасываем индекс активной модели
+                System.out.println("Все модели удалены");
+            } else {
+                // Устанавливаем новую активную модель, если есть
+                setActiveModel(Math.max(0, activeModelIndex - 1)); // Устанавливаем предыдущую модель
+            }
+        } else {
+            System.out.println("Нет активной модели для удаления");
         }
     }
 
-    private void handleMouseReleased(MouseEvent event) {
-        isMousePressed = false;
+    private void updateModelList() {
+        modelListView.getItems().clear();
+        for (Model model : models) {
+            modelListView.getItems().add(model.getName());
+        }
     }
 
-    private void handleMouseScroll(ScrollEvent event) {
-        double deltaY = event.getDeltaY();
-        Vector3f direction = camera.getTarget().deduct(camera.getPosition()).normalize();
-        camera.movePosition(direction.multiply((float) (deltaY * ZOOM_SENSITIVITY)));
-    }
-
-    private void updateCameraRotation(double deltaX, double deltaY) {
-        float sensitivity = 0.1f;//сенса
-        float yaw = (float) (-deltaX * sensitivity);
-        float pitch = (float) (-deltaY * sensitivity);
-
-        camera.rotateAroundTarget(yaw, pitch);
+    private void setActiveModel(int index) {
+        if (index >= 0 && index < models.size()) {
+            activeModelIndex = index;
+            mesh = models.get(index); // Устанавливаем mesh как активную модель
+            System.out.println("Активная модель: " + mesh.getName());
+        } else {
+            activeModelIndex = -1;
+            mesh = null; // Сбрасываем mesh, если нет активной модели
+            System.out.println("Нет активной модели");
+        }
     }
 }

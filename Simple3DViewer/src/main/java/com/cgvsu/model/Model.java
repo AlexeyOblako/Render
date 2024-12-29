@@ -15,6 +15,7 @@ public class Model {
     private Vector3f scale = new Vector3f(1, 1, 1);
     private Vector3f rotation = new Vector3f(0, 0, 0);
     private Vector3f translation = new Vector3f(0, 0, 0);
+    private String name = "Unnamed Model";
 
     public Vector3f getScale() {
         return scale;
@@ -40,9 +41,49 @@ public class Model {
         this.translation = translation;
     }
 
+    public String getName() {
+        return this.name;
+    }
+
     public void resetTransformations() {
         setScale(new Vector3f(1, 1, 1));
         setRotation(new Vector3f(0, 0, 0));
         setTranslation(new Vector3f(0, 0, 0));
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Collection<Vector3f> getVertices() {
+        return vertices;
+    }
+
+    public Collection<Vector2f> getTextureVertices() {
+        return textureVertices;
+    }
+
+    public Collection<Vector3f> getNormals() {
+        return normals;
+    }
+
+    public Collection<Polygon> getPolygons() {
+        return polygons;
+    }
+
+    public void addVertex(Vector3f vertex) {
+        this.vertices.add(vertex);
+    }
+
+    public void addTextureVertex(Vector2f textureVertex) {
+        this.textureVertices.add(textureVertex);
+    }
+
+    public void addNormal(Vector3f normal) {
+        this.normals.add(normal);
+    }
+
+    public void addPolygon(Polygon polygon) {
+        this.polygons.add(polygon);
     }
 }
