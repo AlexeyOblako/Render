@@ -67,9 +67,9 @@ public class Camera {
         return GraphicConveyor.perspective(fov, aspectRatio, nearPlane, farPlane);
     }
 
-    public void rotateAroundTarget(float yaw, float pitch, float roll) {
-// Вращение вокруг оси Y (yaw)
-        Vector3f direction = target.deduct(target, position);
+    public void rotateAroundTarget(float yaw, float pitch) {
+        //вращение вокруг Y
+        Vector3f direction = target.deduct(position);
         float yawRad = (float) Math.toRadians(yaw);
         float cosYaw = (float) Math.cos(yawRad);
         float sinYaw = (float) Math.sin(yawRad);
@@ -78,7 +78,7 @@ public class Camera {
         direction.setX(newX);
         direction.setZ(newZ);
 
-// Вращение вокруг оси X (pitch)
+        //вокруг X
         float pitchRad = (float) Math.toRadians(pitch);
         float cosPitch = (float) Math.cos(pitchRad);
         float sinPitch = (float) Math.sin(pitchRad);
@@ -87,16 +87,7 @@ public class Camera {
         direction.setY(newY);
         direction.setZ(newZ2);
 
-// Вращение вокруг оси Z (roll)?????????????????
-        float rollRad = (float) Math.toRadians(roll);
-        float cosRoll = (float) Math.cos(rollRad);
-        float sinRoll = (float) Math.sin(rollRad);
-        float newX2 = direction.getX() * cosRoll - direction.getY() * sinRoll;
-        float newY2 = direction.getX() * sinRoll + direction.getY() * cosRoll;
-        direction.setX(newX2);
-        direction.setY(newY2);
-
-// Обновляем позицию камеры
-        position = target.deduct(target, direction);
+        //обновляем позицию
+        position = target.deduct(direction);
     }
 }

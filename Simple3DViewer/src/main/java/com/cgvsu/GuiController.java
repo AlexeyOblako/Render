@@ -8,6 +8,7 @@ import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
@@ -31,6 +32,7 @@ public class GuiController {
     final private float TRANSLATION = 0.5F;
     final private float SCALE = 0.1F;
     final private float ROTATION = 10F;
+    final private float ZOOM_SENSITIVITY = 0.1F;
 
     @FXML
     public AnchorPane anchorPane;
@@ -73,7 +75,7 @@ public class GuiController {
         canvas.setOnMousePressed(event -> handleMousePressed(event));
         canvas.setOnMouseDragged(event -> handleMouseDragged(event));
         canvas.setOnMouseReleased(event -> handleMouseReleased(event));
-
+        canvas.setOnScroll(event -> handleMouseScroll(event));
     }
 
     @FXML
@@ -154,12 +156,14 @@ public class GuiController {
 
     @FXML
     public void handleCameraForward(ActionEvent actionEvent) {
-        camera.movePosition(new Vector3f(0, 0, -TRANSLATION));
+        Vector3f direction = camera.getTarget().deduct(camera.getPosition()).normalize();
+        camera.movePosition(direction.multiply(TRANSLATION));
     }
 
     @FXML
     public void handleCameraBackward(ActionEvent actionEvent) {
-        camera.movePosition(new Vector3f(0, 0, TRANSLATION));
+        Vector3f direction = camera.getTarget().deduct(camera.getPosition()).normalize();
+        camera.movePosition(direction.multiply(-TRANSLATION));
     }
 
     @FXML
@@ -327,7 +331,7 @@ public class GuiController {
             double deltaX = event.getSceneX() - lastMouseX;
             double deltaY = event.getSceneY() - lastMouseY;
 
-// Обновляем вращение камеры в зависимости от движения мыши
+            // Обновляем вращение камеры в зависимости от движения мыши
             updateCameraRotation(deltaX, deltaY);
 
             lastMouseX = event.getSceneX();
@@ -339,13 +343,17 @@ public class GuiController {
         isMousePressed = false;
     }
 
-    private void updateCameraRotation(double deltaX, double deltaY) {
-        float sensitivity = 0.1f; // Чувствительность мыши
-        float yaw = (float) (-deltaX * sensitivity); // Инвертируем направление вращения по горизонтали
-        float pitch = (float) (-deltaY * sensitivity);
-        float roll = (float) (deltaY * sensitivity);
+    private void handleMouseScroll(ScrollEvent event) {
+        double deltaY = event.getDeltaY();
+        Vector3f direction = camera.getTarget().deduct(camera.getPosition()).normalize();
+        camera.movePosition(direction.multiply((float) (deltaY * ZOOM_SENSITIVITY)));
+    }
 
-// Обновляем углы вращения камеры
-        camera.rotateAroundTarget(yaw, pitch, roll);
+    private void updateCameraRotation(double deltaX, double deltaY) {
+        float sensitivity = 0.1f;//сенса
+        float yaw = (float) (-deltaX * sensitivity);
+        float pitch = (float) (-deltaY * sensitivity);
+
+        camera.rotateAroundTarget(yaw, pitch);
     }
 }
