@@ -58,3 +58,4 @@ public class ObjReaderException extends RuntimeException {
         return new ObjReaderException("Index out of bounds during parsing.", -1);
     }
 }
+
