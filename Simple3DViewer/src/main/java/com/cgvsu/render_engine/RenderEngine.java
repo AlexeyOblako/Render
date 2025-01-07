@@ -6,6 +6,7 @@ import com.cgvsu.math.Vector4f;
 import com.cgvsu.math.matrix.Matrix4f;
 import com.cgvsu.model.Model;
 import com.cgvsu.utils.ZBuffer;
+import com.cgvsu.utils.triangles_utils.BufferedTriangleRasterization;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
@@ -26,7 +27,8 @@ public class RenderEngine {
             final int height,
             final List<Integer> selectedVertices,
             final Color modelColor,
-            final Color backgroundColor
+            final Color backgroundColor,
+            final boolean isRasterizationEnabled // Новый параметр
     ) {
         graphicsContext.setStroke(modelColor);
         graphicsContext.setFill(backgroundColor);
@@ -65,7 +67,25 @@ public class RenderEngine {
                     depthMap.put(resultPoint, vertex.getZ()); // Сохраняем глубину для каждой вершины
                 }
 
-                // Рисуем только контуры полигонов
+                // Если растеризация включена, заполняем полигоны
+                if (isRasterizationEnabled && nVerticesInPolygon >= 3) {
+                    for (int i = 1; i < nVerticesInPolygon - 1; i++) {
+                        Vector2f v1 = resultPoints.get(0);
+                        Vector2f v2 = resultPoints.get(i);
+                        Vector2f v3 = resultPoints.get(i + 1);
+
+                        // Используем метод растеризации треугольников
+                        BufferedTriangleRasterization.drawTriangle(
+                                graphicsContext,
+                                depthMap,
+                                v1, v2, v3, // Вершины треугольника
+                                zBuffer,    // Z-буфер
+                                modelColor  // Цвет треугольника
+                        );
+                    }
+                }
+
+                // Рисуем контуры полигонов
                 for (int vertexInPolygonInd = 1; vertexInPolygonInd < nVerticesInPolygon; ++vertexInPolygonInd) {
                     graphicsContext.strokeLine(
                             resultPoints.get(vertexInPolygonInd - 1).getX(),

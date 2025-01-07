@@ -103,11 +103,13 @@ public class GuiController {
             double width = canvas.getWidth();
             double height = canvas.getHeight();
 
+            // Очистка сцены
             canvas.getGraphicsContext2D().clearRect(0, 0, width, height);
-            camera.setAspectRatio((float) (width / height));
-            Color modelColor = modelColorPicker.getValue();
 
-            // Рендеринг с учетом флага fillPolygons
+            // Установка аспекта камеры
+            camera.setAspectRatio((float) (width / height));
+
+            // Вызов RenderEngine.render с флагом isRasterizationEnabled
             RenderEngine.render(
                     canvas.getGraphicsContext2D(),
                     camera,
@@ -115,14 +117,16 @@ public class GuiController {
                     (int) width,
                     (int) height,
                     selectedVertices,
-                    modelColor,
-                    Color.WHITE
+                    modelColorPicker.getValue(),
+                    Color.WHITE,
+                    isRasterizationEnabled // Передаем флаг
             );
         });
 
         timeline.getKeyFrames().add(frame);
         timeline.play();
 
+        // Обработчики событий мыши и клавиатуры
         canvas.setOnMousePressed(this::handleMousePressed1);
         canvas.setOnMouseDragged(this::handleMouseDragged1);
         canvas.setOnMouseReleased(this::handleMouseReleased1);
