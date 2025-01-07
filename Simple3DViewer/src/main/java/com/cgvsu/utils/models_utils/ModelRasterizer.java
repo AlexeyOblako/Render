@@ -20,8 +20,14 @@ import java.util.Map;
 import static com.cgvsu.math.Vector3f.vertex3fToVector2f;
 
 public class ModelRasterizer {
-    public static void rasterizeModel(GraphicsContext gc, TriPolyModel model, Matrix4f modelViewProjectionMatrix, int width, int height, Color color, ArrayList<ArrayList<Float>> buffer) {
-
+    public static void rasterizeModel(
+            GraphicsContext gc,
+            TriPolyModel model,
+            Matrix4f modelViewProjectionMatrix,
+            int width, int height,
+            Color color,
+            ArrayList<ArrayList<Float>> buffer
+    ) {
         Map<Vector2f, Float> depthMap = new HashMap<>();
         for (Polygon polygon : model.polygons) {
             ArrayList<Vector3f> vertices = new ArrayList<>();
@@ -41,10 +47,9 @@ public class ModelRasterizer {
             BufferedTriangleRasterization.drawTriangle(
                     gc,
                     depthMap,
-                    points.get(0), color,
-                    points.get(1), color,
-                    points.get(2), color,
-                    buffer
+                    points.get(0), points.get(1), points.get(2), // Вершины треугольника
+                    buffer, // Z-буфер
+                    color   // Цвет треугольника
             );
 
             TriangleRasterization.drawTriangle(gc, points, Color.RED, Color.GREEN, Color.BLUE);

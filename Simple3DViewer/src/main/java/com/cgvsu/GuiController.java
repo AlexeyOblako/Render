@@ -116,8 +116,7 @@ public class GuiController {
                     (int) height,
                     selectedVertices,
                     modelColor,
-                    Color.WHITE,
-                    fillPolygons // Передаем флаг заполнения полигонов
+                    Color.WHITE
             );
         });
 

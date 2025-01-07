@@ -6,7 +6,6 @@ import com.cgvsu.math.Vector4f;
 import com.cgvsu.math.matrix.Matrix4f;
 import com.cgvsu.model.Model;
 import com.cgvsu.utils.ZBuffer;
-import com.cgvsu.utils.triangles_utils.BufferedTriangleRasterization;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
@@ -27,8 +26,7 @@ public class RenderEngine {
             final int height,
             final List<Integer> selectedVertices,
             final Color modelColor,
-            final Color backgroundColor,
-            final boolean fillPolygons
+            final Color backgroundColor
     ) {
         graphicsContext.setStroke(modelColor);
         graphicsContext.setFill(backgroundColor);
@@ -67,51 +65,22 @@ public class RenderEngine {
                     depthMap.put(resultPoint, vertex.getZ()); // Сохраняем глубину для каждой вершины
                 }
 
-                if (fillPolygons && nVerticesInPolygon >= 3) {
-                    // Разбиваем полигон на треугольники и рисуем их
-                    for (int i = 1; i < nVerticesInPolygon - 1; i++) {
-                        Vector2f v1 = resultPoints.get(0);
-                        Vector2f v2 = resultPoints.get(i);
-                        Vector2f v3 = resultPoints.get(i + 1);
-
-                        // Цвета вершин (можно задать свои)
-                        Color color1 = modelColor;
-                        Color color2 = modelColor;
-                        Color color3 = modelColor;
-
-                        // Проверка и нормализация цветов
-                        color1 = normalizeColor(color1);
-                        color2 = normalizeColor(color2);
-                        color3 = normalizeColor(color3);
-
-                        // Используем метод растеризации треугольников
-                        BufferedTriangleRasterization.drawTriangle(
-                                graphicsContext,
-                                depthMap,
-                                v1, color1,
-                                v2, color2,
-                                v3, color3,
-                                zBuffer
-                        );
-                    }
-                } else {
-                    // Рисуем только контуры полигонов
-                    for (int vertexInPolygonInd = 1; vertexInPolygonInd < nVerticesInPolygon; ++vertexInPolygonInd) {
-                        graphicsContext.strokeLine(
-                                resultPoints.get(vertexInPolygonInd - 1).getX(),
-                                resultPoints.get(vertexInPolygonInd - 1).getY(),
-                                resultPoints.get(vertexInPolygonInd).getX(),
-                                resultPoints.get(vertexInPolygonInd).getY()
-                        );
-                    }
-                    if (nVerticesInPolygon > 0) {
-                        graphicsContext.strokeLine(
-                                resultPoints.get(nVerticesInPolygon - 1).getX(),
-                                resultPoints.get(nVerticesInPolygon - 1).getY(),
-                                resultPoints.get(0).getX(),
-                                resultPoints.get(0).getY()
-                        );
-                    }
+                // Рисуем только контуры полигонов
+                for (int vertexInPolygonInd = 1; vertexInPolygonInd < nVerticesInPolygon; ++vertexInPolygonInd) {
+                    graphicsContext.strokeLine(
+                            resultPoints.get(vertexInPolygonInd - 1).getX(),
+                            resultPoints.get(vertexInPolygonInd - 1).getY(),
+                            resultPoints.get(vertexInPolygonInd).getX(),
+                            resultPoints.get(vertexInPolygonInd).getY()
+                    );
+                }
+                if (nVerticesInPolygon > 0) {
+                    graphicsContext.strokeLine(
+                            resultPoints.get(nVerticesInPolygon - 1).getX(),
+                            resultPoints.get(nVerticesInPolygon - 1).getY(),
+                            resultPoints.get(0).getX(),
+                            resultPoints.get(0).getY()
+                    );
                 }
             }
 
