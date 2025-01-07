@@ -6,10 +6,10 @@ import com.cgvsu.math.Vector3f;
 import java.util.*;
 
 public class Model {
-    public ArrayList<Vector3f> vertices = new ArrayList<Vector3f>();
-    public ArrayList<Vector2f> textureVertices = new ArrayList<Vector2f>();
-    public ArrayList<Vector3f> normals = new ArrayList<Vector3f>();
-    public ArrayList<Polygon> polygons = new ArrayList<Polygon>();
+    public ArrayList<Vector3f> vertices = new ArrayList<>();
+    public ArrayList<Vector2f> textureVertices = new ArrayList< >();
+    public ArrayList<Vector3f> normals = new ArrayList<>();
+    public ArrayList<Polygon> polygons = new ArrayList<>();
 
     // параметры для трансформации
     private Vector3f scale = new Vector3f(1, 1, 1);
@@ -104,7 +104,7 @@ public class Model {
     private void updatePolygonIndicesAfterVertexRemoval(int removedVertexIndex) {
         // Перебор полигонов
         for (Polygon polygon : polygons) {
-            List<Integer> updatedVertexIndices = new ArrayList<>();
+            ArrayList<Integer> updatedVertexIndices = new ArrayList<>();
             for (int vertexIndex : polygon.getVertexIndices()) {
                 if (vertexIndex < removedVertexIndex) {
                     updatedVertexIndices.add(vertexIndex);
@@ -113,7 +113,7 @@ public class Model {
                 }
             }
 
-            polygon.setVertexIndices((ArrayList<Integer>) updatedVertexIndices);
+            polygon.setVertexIndices(updatedVertexIndices);
         }
 
         polygons.removeIf(polygon -> polygon.getVertexIndices().size() < 3);
