@@ -118,4 +118,6 @@ public class Model {
 
         polygons.removeIf(polygon -> polygon.getVertexIndices().size() < 3);
     }
+
+
 }

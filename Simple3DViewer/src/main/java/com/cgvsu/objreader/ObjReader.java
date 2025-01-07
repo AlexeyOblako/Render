@@ -78,11 +78,22 @@ public class ObjReader {
 	 * @return объект Vector2f, представляющий текстурную вершину
 	 */
 	static Vector2f parseTextureVertex(ArrayList<String> words, int lineInd) {
-		validateArgumentCount(words, 2, "texture vertex", lineInd);
-		return new Vector2f(
-				parseFloat(words.get(0), lineInd),
-				parseFloat(words.get(1), lineInd)
-		);
+		// Проверяем, что количество аргументов не меньше 2 и не больше 3
+		if (words.size() < 2 || words.size() > 3) {
+			throw ObjReaderException.tooManyArguments("texture vertex", lineInd);
+		}
+
+		// Парсим только первые два параметра (u и v), игнорируя третий (w)
+		float u = parseFloat(words.get(0), lineInd);
+		float v = parseFloat(words.get(1), lineInd);
+
+		// Если есть третий параметр, вы можете его проигнорировать или использовать
+		if (words.size() == 3) {
+			float w = parseFloat(words.get(2), lineInd);
+			// Вы можете использовать w, если это необходимо
+		}
+
+		return new Vector2f(u, v);
 	}
 
 	/**

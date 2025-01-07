@@ -6,6 +6,8 @@ import com.cgvsu.math.matrix.Matrix4f;
 import com.cgvsu.objwriter.ObjWriter;
 import com.cgvsu.render_engine.GraphicConveyor;
 import com.cgvsu.render_engine.RenderEngine;
+import com.cgvsu.utils.NormalUtils;
+import com.cgvsu.utils.models_utils.Triangulation;
 import javafx.fxml.FXML;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -14,6 +16,7 @@ import javafx.event.ActionEvent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ListView;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -46,6 +49,11 @@ public class GuiController {
     final private float ROTATION = 10F;
     final private float ZOOM_SENSITIVITY = 0.1F;
     private List<Integer> selectedVertices = new ArrayList<>();
+
+
+    private boolean isTriangulationEnabled = false; // Флаг для триангуляции
+    private boolean isRasterizationEnabled = false; // Флаг для растеризации
+    private boolean fillPolygons = false; // Флаг для включения/выключения заполнения полигонов
 
 
     @FXML
@@ -99,22 +107,31 @@ public class GuiController {
             camera.setAspectRatio((float) (width / height));
             Color modelColor = modelColorPicker.getValue();
 
-            //Рендеринг всех моделей
-            RenderEngine.render(canvas.getGraphicsContext2D(), camera, models, (int) width, (int) height,selectedVertices, modelColor,Color.WHITE);
-
+            // Рендеринг с учетом флага fillPolygons
+            RenderEngine.render(
+                    canvas.getGraphicsContext2D(),
+                    camera,
+                    models,
+                    (int) width,
+                    (int) height,
+                    selectedVertices,
+                    modelColor,
+                    Color.WHITE,
+                    fillPolygons // Передаем флаг заполнения полигонов
+            );
         });
 
         timeline.getKeyFrames().add(frame);
         timeline.play();
 
-        canvas.setOnMousePressed(event -> handleMousePressed1(event));
-        canvas.setOnMouseDragged(event -> handleMouseDragged1(event));
-        canvas.setOnMouseReleased(event -> handleMouseReleased1(event));
-        canvas.setOnKeyPressed(event -> handleKeyPressed(event));
-        canvas.setOnMousePressed(event -> handleMousePressed(event));
-        canvas.setOnMouseDragged(event -> handleMouseDragged(event));
-        canvas.setOnMouseReleased(event -> handleMouseReleased(event));
-        canvas.setOnScroll(event -> handleMouseScroll(event));
+        canvas.setOnMousePressed(this::handleMousePressed1);
+        canvas.setOnMouseDragged(this::handleMouseDragged1);
+        canvas.setOnMouseReleased(this::handleMouseReleased1);
+        canvas.setOnKeyPressed(this::handleKeyPressed);
+        canvas.setOnMousePressed(this::handleMousePressed);
+        canvas.setOnMouseDragged(this::handleMouseDragged);
+        canvas.setOnMouseReleased(this::handleMouseReleased);
+        canvas.setOnScroll(this::handleMouseScroll);
     }
     /**
      * Сохранение позиции мышки при нажатии
@@ -604,6 +621,55 @@ public class GuiController {
         float pitch = (float) (-deltaY * sensitivity);
 
         camera.rotateAroundTarget(yaw, pitch);
+    }
+
+    private boolean isTriangulationApplied = false; // Флаг для проверки, была ли уже применена триангуляция
+    private Model originalModel; // Переменная для хранения оригинальной модели
+    @FXML
+    private void handleTriangulate(ActionEvent event) {
+        if (!isTriangulationApplied) {
+            isTriangulationEnabled = true;
+            System.out.println("Триангуляция включена");
+            if (activeModelIndex != -1) {
+                Model activeModel = models.get(activeModelIndex);
+                originalModel = activeModel; // Сохраняем оригинальную модель
+                models.set(activeModelIndex, Triangulation.getTriangulatedModel(activeModel));
+                isTriangulationApplied = true;
+                timeline.playFromStart();
+            }
+        } else {
+            System.out.println("Триангуляция уже была применена");
+        }
+    }
+
+    @FXML
+    private void handleDisableTriangulate(ActionEvent event) {
+        isTriangulationEnabled = false;
+        isTriangulationApplied = false;
+        System.out.println("Триангуляция отключена");
+        if (activeModelIndex != -1) {
+            models.set(activeModelIndex, loadOriginalModel()); // Возвращаем оригинальную модель
+            timeline.playFromStart(); // Перерисовываем сцену
+        }
+    }
+
+    @FXML
+    private void handleEnableRasterization(ActionEvent event) {
+        isRasterizationEnabled = true;
+        System.out.println("Растеризация включена");
+        timeline.playFromStart(); // Перерисовываем сцену
+    }
+
+    @FXML
+    private void handleDisableRasterization(ActionEvent event) {
+        isRasterizationEnabled = false;
+        System.out.println("Растеризация отключена");
+        timeline.playFromStart(); // Перерисовываем сцену
+    }
+    // Возвращаем сохранённую оригинальную модель
+    private Model loadOriginalModel() {
+
+        return originalModel;
     }
 
 }

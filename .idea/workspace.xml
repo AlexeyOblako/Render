@@ -4,17 +4,33 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cec51d7d-17e3-443a-8bab-359958c22010" name="Changes" comment="1 чел добавлен, вроде частично">
+    <list default="true" id="cec51d7d-17e3-443a-8bab-359958c22010" name="Changes" comment="Улучшение Z буфера и добавление в RenderEngine">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/GuiController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/GuiController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/model/Model.java" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/model/Model.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/objreader/ObjReader.java" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/objreader/ObjReader.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/render_engine/RenderEngine.java" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/render_engine/RenderEngine.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/utils/ZBuffer.java" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/utils/ZBuffer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/utils/models_utils/ModelRasterizer.java" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/utils/models_utils/ModelRasterizer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/utils/triangles_utils/BufferedTriangleRasterization.java" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/utils/triangles_utils/BufferedTriangleRasterization.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/src/main/java/module-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/src/main/java/module-info.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/src/main/resources/com/cgvsu/fxml/gui.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/src/main/resources/com/cgvsu/fxml/gui.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/GuiController.class" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/GuiController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/model/Model.class" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/model/Model.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/objreader/ObjReaderException.class" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/objreader/ObjReaderException.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/objwriter/ObjWriterException.class" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/objwriter/ObjWriterException.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/render_engine/Camera.class" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/render_engine/Camera.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/fxml/gui.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/fxml/gui.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/render_engine/RenderEngine.class" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/render_engine/RenderEngine.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/classes/module-info.class" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/classes/module-info.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/test-classes/GuiControllerTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/test-classes/com/cgvsu/objreader/ObjReaderTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/test-classes/com/cgvsu/objwriter/ObjWriterTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/test-classes/math/Vector2fTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/test-classes/math/Vector3fTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/test-classes/math/Vector4fTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/test-classes/math/matrix/Matrix3fTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/test-classes/math/matrix/Matrix4fTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/test-classes/render_engine/GraphicConveyorTest.class" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,17 +62,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Project/Task4&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "D:/programmist/CGVSU-main/3DModels/SimpleModelsForReaderTests/Torus.obj",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Application.Main">
     <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="com.cgvsu.Main" />
@@ -152,6 +173,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1733687775171</updated>
+      <workItem from="1736285507692" duration="1909000" />
     </task>
     <task id="LOCAL-00001" summary="Vse pochinil, ostalos testi dobavit">
       <option name="closed" value="true" />
@@ -187,6 +209,20 @@
     </task>
     <option name="localTasksCounter" value="5" />
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Vse pochinil, ostalos testi dobavit" />

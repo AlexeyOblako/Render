@@ -13,6 +13,11 @@
                         <KeyCodeCombination alt="UP" control="DOWN" meta="UP" shift="UP" shortcut="UP" code="F"/>
                     </accelerator>
                 </MenuItem>
+                <MenuItem mnemonicParsing="false" onAction="#onLoadTextureMenuItemClick" text="Load Texture">
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" control="DOWN" meta="UP" shift="UP" shortcut="UP" code="T"/>
+                    </accelerator>
+                </MenuItem>
                 <MenuItem mnemonicParsing="false" onAction="#onSaveOriginalModelMenuItemClick" text="Save Orig. Model">
                     <accelerator>
                         <KeyCodeCombination alt="UP" control="DOWN" meta="UP" shift="UP" shortcut="UP" code="O"/>
@@ -138,6 +143,14 @@
                         <KeyCodeCombination alt="UP" control="DOWN" meta="UP" shift="UP" shortcut="UP" code="N"/>
                     </accelerator>
                 </MenuItem>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Triangulation">
+                <MenuItem mnemonicParsing="false" onAction="#handleTriangulate" text="On"/>
+                <MenuItem mnemonicParsing="false" onAction="#handleDisableTriangulate" text="Off"/>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Rasterization">
+                <MenuItem mnemonicParsing="false" onAction="#handleEnableRasterization" text="On"/>
+                <MenuItem mnemonicParsing="false" onAction="#handleDisableRasterization" text="Off"/>
             </Menu>
         </MenuBar>
 

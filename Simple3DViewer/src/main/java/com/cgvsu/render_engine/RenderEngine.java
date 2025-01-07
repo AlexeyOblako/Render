@@ -1,17 +1,21 @@
 package com.cgvsu.render_engine;
 
-import java.util.ArrayList;
-import java.util.List;
 import com.cgvsu.math.Vector2f;
-import com.cgvsu.math.Vector4f;
-import javafx.scene.canvas.GraphicsContext;
-import com.cgvsu.model.Model;
 import com.cgvsu.math.Vector3f;
+import com.cgvsu.math.Vector4f;
 import com.cgvsu.math.matrix.Matrix4f;
+import com.cgvsu.model.Model;
+import com.cgvsu.utils.ZBuffer;
+import com.cgvsu.utils.triangles_utils.BufferedTriangleRasterization;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static com.cgvsu.render_engine.GraphicConveyor.*;
+import static com.cgvsu.render_engine.GraphicConveyor.vertexToPoint;
 
 public class RenderEngine {
 
@@ -23,11 +27,15 @@ public class RenderEngine {
             final int height,
             final List<Integer> selectedVertices,
             final Color modelColor,
-            final Color backgroundColor
+            final Color backgroundColor,
+            final boolean fillPolygons
     ) {
         graphicsContext.setStroke(modelColor);
         graphicsContext.setFill(backgroundColor);
         graphicsContext.fillRect(0, 0, width, height);
+
+        // Инициализация Z-буфера
+        ArrayList<ArrayList<Float>> zBuffer = ZBuffer.getDefaultPixelDepthMatrix(width, height);
 
         for (Model mesh : models) {
             Matrix4f modelMatrix = GraphicConveyor.rotateScaleTranslate(
@@ -44,29 +52,67 @@ public class RenderEngine {
                 final int nVerticesInPolygon = mesh.polygons.get(polygonInd).getVertexIndices().size();
 
                 ArrayList<Vector2f> resultPoints = new ArrayList<>();
+                ArrayList<Vector3f> vertices = new ArrayList<>();
+                Map<Vector2f, Float> depthMap = new HashMap<>();
+
                 for (int vertexInPolygonInd = 0; vertexInPolygonInd < nVerticesInPolygon; ++vertexInPolygonInd) {
                     Vector3f vertex = mesh.vertices.get(mesh.polygons.get(polygonInd).getVertexIndices().get(vertexInPolygonInd));
-
                     Vector4f vertexVecmath = new Vector4f(vertex.getX(), vertex.getY(), vertex.getZ(), 1);
-
-                    com.cgvsu.math.Vector2f resultPoint = vertexToPoint(Matrix4f.multiply(modelViewProjectionMatrix, vertexVecmath).normalizeTo3f(), width, height);
+                    Vector2f resultPoint = vertexToPoint(
+                            Matrix4f.multiply(modelViewProjectionMatrix, vertexVecmath).normalizeTo3f(),
+                            width, height
+                    );
                     resultPoints.add(resultPoint);
+                    vertices.add(vertex);
+                    depthMap.put(resultPoint, vertex.getZ()); // Сохраняем глубину для каждой вершины
                 }
 
-                for (int vertexInPolygonInd = 1; vertexInPolygonInd < nVerticesInPolygon; ++vertexInPolygonInd) {
-                    graphicsContext.strokeLine(
-                            resultPoints.get(vertexInPolygonInd - 1).getX(),
-                            resultPoints.get(vertexInPolygonInd - 1).getY(),
-                            resultPoints.get(vertexInPolygonInd).getX(),
-                            resultPoints.get(vertexInPolygonInd).getY());
-                }
+                if (fillPolygons && nVerticesInPolygon >= 3) {
+                    // Разбиваем полигон на треугольники и рисуем их
+                    for (int i = 1; i < nVerticesInPolygon - 1; i++) {
+                        Vector2f v1 = resultPoints.get(0);
+                        Vector2f v2 = resultPoints.get(i);
+                        Vector2f v3 = resultPoints.get(i + 1);
 
-                if (nVerticesInPolygon > 0)
-                    graphicsContext.strokeLine(
-                            resultPoints.get(nVerticesInPolygon - 1).getX(),
-                            resultPoints.get(nVerticesInPolygon - 1).getY(),
-                            resultPoints.get(0).getX(),
-                            resultPoints.get(0).getY());
+                        // Цвета вершин (можно задать свои)
+                        Color color1 = modelColor;
+                        Color color2 = modelColor;
+                        Color color3 = modelColor;
+
+                        // Проверка и нормализация цветов
+                        color1 = normalizeColor(color1);
+                        color2 = normalizeColor(color2);
+                        color3 = normalizeColor(color3);
+
+                        // Используем метод растеризации треугольников
+                        BufferedTriangleRasterization.drawTriangle(
+                                graphicsContext,
+                                depthMap,
+                                v1, color1,
+                                v2, color2,
+                                v3, color3,
+                                zBuffer
+                        );
+                    }
+                } else {
+                    // Рисуем только контуры полигонов
+                    for (int vertexInPolygonInd = 1; vertexInPolygonInd < nVerticesInPolygon; ++vertexInPolygonInd) {
+                        graphicsContext.strokeLine(
+                                resultPoints.get(vertexInPolygonInd - 1).getX(),
+                                resultPoints.get(vertexInPolygonInd - 1).getY(),
+                                resultPoints.get(vertexInPolygonInd).getX(),
+                                resultPoints.get(vertexInPolygonInd).getY()
+                        );
+                    }
+                    if (nVerticesInPolygon > 0) {
+                        graphicsContext.strokeLine(
+                                resultPoints.get(nVerticesInPolygon - 1).getX(),
+                                resultPoints.get(nVerticesInPolygon - 1).getY(),
+                                resultPoints.get(0).getX(),
+                                resultPoints.get(0).getY()
+                        );
+                    }
+                }
             }
 
             if (!selectedVertices.isEmpty()) {
@@ -83,16 +129,25 @@ public class RenderEngine {
             int height,
             List<Integer> selectedVertices
     ) {
-
         gc.setLineWidth(1);
 
         for (int vertexIndex : selectedVertices) {
             Vector3f vertex = mesh.vertices.get(vertexIndex);
             Vector4f vertexVecmath = new Vector4f(vertex.getX(), vertex.getY(), vertex.getZ(), 1);
-            com.cgvsu.math.Vector2f screenPoint = vertexToPoint(Matrix4f.multiply(modelViewProjectionMatrix, vertexVecmath).normalizeTo3f(), width, height);
+            Vector2f screenPoint = vertexToPoint(
+                    Matrix4f.multiply(modelViewProjectionMatrix, vertexVecmath).normalizeTo3f(),
+                    width, height
+            );
 
-            /// круг
+            // Рисуем круг вокруг выбранной вершины
             gc.strokeOval(screenPoint.getX() - 5, screenPoint.getY() - 5, 10, 10);
         }
+    }
+
+    private static Color normalizeColor(Color color) {
+        double red = Math.min(1.0, Math.max(0.0, color.getRed()));
+        double green = Math.min(1.0, Math.max(0.0, color.getGreen()));
+        double blue = Math.min(1.0, Math.max(0.0, color.getBlue()));
+        return new Color(red, green, blue, 1.0);
     }
 }
