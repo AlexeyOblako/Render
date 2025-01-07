@@ -63,7 +63,7 @@ public class Vector4f {
                 first.x + second.x,
                 first.y + second.y,
                 first.z + second.z,
-                first.w + second.z
+                first.w + second.w
         );
     }
 
@@ -77,7 +77,7 @@ public class Vector4f {
                 first.x - second.x,
                 first.y - second.y,
                 first.z - second.z,
-                first.w - second.z
+                first.w - second.w
         );
     }
 
