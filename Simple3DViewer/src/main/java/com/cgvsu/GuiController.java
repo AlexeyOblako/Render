@@ -4,6 +4,7 @@ import com.cgvsu.math.Vector2f;
 import com.cgvsu.math.Vector4f;
 import com.cgvsu.math.matrix.Matrix4f;
 import com.cgvsu.objwriter.ObjWriter;
+import com.cgvsu.render_engine.CameraManager;
 import com.cgvsu.render_engine.GraphicConveyor;
 import com.cgvsu.render_engine.RenderEngine;
 import com.cgvsu.utils.NormalUtils;
@@ -14,8 +15,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.ColorPicker;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -39,7 +39,6 @@ import com.cgvsu.model.Model;
 import com.cgvsu.objreader.ObjReader;
 import com.cgvsu.render_engine.Camera;
 
-
 public class GuiController {
     private double lastMouseX = 0;
     private double lastMouseY = 0;
@@ -50,11 +49,9 @@ public class GuiController {
     final private float ZOOM_SENSITIVITY = 0.1F;
     private List<Integer> selectedVertices = new ArrayList<>();
 
-
-    private boolean isTriangulationEnabled = false; // Флаг для триангуляции
-    private boolean isRasterizationEnabled = false; // Флаг для растеризации
-    private boolean fillPolygons = false; // Флаг для включения/выключения заполнения полигонов
-
+    private boolean isTriangulationEnabled = false;
+    private boolean isRasterizationEnabled = false;
+    private boolean fillPolygons = false;
 
     @FXML
     AnchorPane anchorPane;
@@ -66,36 +63,36 @@ public class GuiController {
     @FXML
     private ColorPicker modelColorPicker;
 
-
-
     @FXML
-    private ListView<String> modelListView; // Список моделей
-    private ArrayList<Model> models = new ArrayList<>(); // Список моделей
-    private int activeModelIndex = -1; // Индекс активной модели
-
-
-    private Camera camera = new Camera(
-            new Vector3f(0, 0, 100),
-            new Vector3f(0, 0, 0),
-            1.0F, 1, 0.01F, 100);
+    private ListView<String> modelListView;
+    private ArrayList<Model> models = new ArrayList<>();
+    private int activeModelIndex = -1;
 
     private Timeline timeline;
 
-    /**
-     * Рендеринг
-     */
+    @FXML
+    private Button addCameraButton;
+    @FXML
+    private Button removeCameraButton;
+    @FXML
+    private Button switchCameraButton;
+    @FXML
+    private Label activeCameraLabel;
+    @FXML
+    private ComboBox<String> cameraComboBox;
+
+    private CameraManager cameraManager;
+
     @FXML
     private void initialize() {
         modelColorPicker.setValue(Color.BLACK);
         anchorPane.prefWidthProperty().addListener((ov, oldValue, newValue) -> canvas.setWidth(newValue.doubleValue()));
         anchorPane.prefHeightProperty().addListener((ov, oldValue, newValue) -> canvas.setHeight(newValue.doubleValue()));
 
-        // Инициализация списка моделей
         modelListView.getSelectionModel().selectedIndexProperty().addListener((obs, oldVal, newVal) -> {
             setActiveModel(newVal.intValue());
         });
 
-        // Инициализация таймлайна для рендеринга
         timeline = new Timeline();
         timeline.setCycleCount(Animation.INDEFINITE);
 
@@ -103,30 +100,38 @@ public class GuiController {
             double width = canvas.getWidth();
             double height = canvas.getHeight();
 
-            // Очистка сцены
             canvas.getGraphicsContext2D().clearRect(0, 0, width, height);
 
-            // Установка аспекта камеры
-            camera.setAspectRatio((float) (width / height));
+            Camera activeCamera = cameraManager.getActiveCamera();
+            if (activeCamera != null) {
+                activeCamera.setAspectRatio((float) (width / height));
+            }
 
-            // Вызов RenderEngine.render с флагом isRasterizationEnabled
             RenderEngine.render(
                     canvas.getGraphicsContext2D(),
-                    camera,
+                    cameraManager,
                     models,
                     (int) width,
                     (int) height,
                     selectedVertices,
                     modelColorPicker.getValue(),
                     Color.WHITE,
-                    isRasterizationEnabled // Передаем флаг
+                    isRasterizationEnabled
             );
         });
+
+        cameraManager = new CameraManager();
+        cameraManager.addCamera(new Camera(
+                new Vector3f(0, 0, 100),
+                new Vector3f(0, 0, 0),
+                1.0F, 1, 0.01F, 100
+        ));
+        updateCameraComboBox();
+        updateActiveCameraLabel();
 
         timeline.getKeyFrames().add(frame);
         timeline.play();
 
-        // Обработчики событий мыши и клавиатуры
         canvas.setOnMousePressed(this::handleMousePressed1);
         canvas.setOnMouseDragged(this::handleMouseDragged1);
         canvas.setOnMouseReleased(this::handleMouseReleased1);
@@ -136,9 +141,7 @@ public class GuiController {
         canvas.setOnMouseReleased(this::handleMouseReleased);
         canvas.setOnScroll(this::handleMouseScroll);
     }
-    /**
-     * Сохранение позиции мышки при нажатии
-     */
+
     private void handleMousePressed1(MouseEvent event) {
         lastMouseX = event.getSceneX();
         lastMouseY = event.getSceneY();
@@ -160,11 +163,10 @@ public class GuiController {
                 models.get(activeModelIndex).getTranslation().getY(),
                 models.get(activeModelIndex).getTranslation().getZ()
         );
-        Matrix4f viewMatrix = camera.getViewMatrix();
-        Matrix4f projectionMatrix = camera.getProjectionMatrix();
+        Matrix4f viewMatrix = cameraManager.getActiveCamera().getViewMatrix();
+        Matrix4f projectionMatrix = cameraManager.getActiveCamera().getProjectionMatrix();
         Matrix4f modelViewProjectionMatrix = Matrix4f.multiply(projectionMatrix, Matrix4f.multiply(viewMatrix, modelMatrix));
 
-        // ближ верш
         int closestVertexIndex = findClosestVertex(mouseX, mouseY, modelViewProjectionMatrix);
 
         if (closestVertexIndex != -1) {
@@ -207,24 +209,16 @@ public class GuiController {
         return closestVertexIndex;
     }
 
-
-
-
-    /**
-     * Фиксация касания мыши и измененин цвета модели
-     */
     private void handleMouseReleased1(MouseEvent event) {
         isMousePressed = false;
     }
+
     @FXML
     private void handleModelColorChange(ActionEvent event) {
         Color color = modelColorPicker.getValue();
         canvas.getGraphicsContext2D().setStroke(color);
     }
 
-    /**
-     * Открытие меню для загрузки 3д модели
-     */
     @FXML
     private void onOpenModelMenuItemClick() {
         FileChooser fileChooser = new FileChooser();
@@ -236,17 +230,16 @@ public class GuiController {
             return;
         }
 
-
         Path fileName = Path.of(file.getAbsolutePath());
 
         try {
             String fileContent = Files.readString(fileName);
 
             Model newModel = ObjReader.read(fileContent);
-            newModel.setName(file.getName()); // Установка имени модели
+            newModel.setName(file.getName());
             models.add(newModel);
             updateModelList();
-            setActiveModel(models.size() - 1); // Установка новой модели как активной
+            setActiveModel(models.size() - 1);
         } catch (IOException exception) {
             System.out.println("Ошибка загрузки модели: " + exception.getMessage());
         } catch (Exception e) {
@@ -254,10 +247,6 @@ public class GuiController {
         }
     }
 
-
-    /**
-     * Сохранение оригинальной модели в файл
-     */
     @FXML
     private void onSaveOriginalModelMenuItemClick() {
         if (mesh == null) {
@@ -276,17 +265,13 @@ public class GuiController {
         Path fileName = Path.of(file.getAbsolutePath());
 
         try {
-
             String originalModelContent = ObjWriter.write(mesh, false);
             Files.writeString(fileName, originalModelContent);
         } catch (IOException exception) {
-
+            System.out.println("Ошибка сохранения модели: " + exception.getMessage());
         }
     }
 
-    /**
-     * Сохранение измененной модели
-     */
     @FXML
     private void onSaveTransformedModelMenuItemClick() {
         if (activeModelIndex != -1) {
@@ -297,9 +282,6 @@ public class GuiController {
         }
     }
 
-    /**
-     *  Метод для сохранения модели
-     */
     private void saveModel(Model model, boolean applyTransformations) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
@@ -321,27 +303,36 @@ public class GuiController {
         }
     }
 
-    /**
-     * Тут математики мудрили, работа с камерой
-     */
     @FXML
     public void handleCameraForward(ActionEvent actionEvent) {
-        camera.movePositionAndTarget(new Vector3f(0, 0, -TRANSLATION));
+        Camera activeCamera = cameraManager.getActiveCamera();
+        if (activeCamera != null) {
+            activeCamera.movePositionAndTarget(new Vector3f(0, 0, -TRANSLATION));
+        }
     }
 
     @FXML
     public void handleCameraBackward(ActionEvent actionEvent) {
-        camera.movePositionAndTarget(new Vector3f(0, 0, TRANSLATION));
+        Camera activeCamera = cameraManager.getActiveCamera();
+        if (activeCamera != null) {
+            activeCamera.movePositionAndTarget(new Vector3f(0, 0, TRANSLATION));
+        }
     }
 
     @FXML
     public void handleCameraLeft(ActionEvent actionEvent) {
-        camera.movePositionAndTarget(new Vector3f(TRANSLATION, 0, 0));
+        Camera activeCamera = cameraManager.getActiveCamera();
+        if (activeCamera != null) {
+            activeCamera.movePositionAndTarget(new Vector3f(TRANSLATION, 0, 0));
+        }
     }
 
     @FXML
     public void handleCameraRight(ActionEvent actionEvent) {
-        camera.movePositionAndTarget(new Vector3f(-TRANSLATION, 0, 0));
+        Camera activeCamera = cameraManager.getActiveCamera();
+        if (activeCamera != null) {
+            activeCamera.movePositionAndTarget(new Vector3f(-TRANSLATION, 0, 0));
+        }
     }
 
     @FXML
@@ -488,44 +479,37 @@ public class GuiController {
         }
     }
 
-
     private void handleMouseDragged1(MouseEvent event) {
         float deltaX = (float) (event.getX() - lastMouseX);
         float deltaY = (float) (event.getY() - lastMouseY);
 
-        Vector3f position = camera.getPosition();
-        Vector3f target = camera.getTarget();
+        Camera activeCamera = cameraManager.getActiveCamera();
+        if (activeCamera == null) {
+            return;
+        }
 
-        //Процесс нахождения вектора направления от позиции камеры к определенной цели
+        Vector3f position = activeCamera.getPosition();
+        Vector3f target = activeCamera.getTarget();
+
         Vector3f direction = target.deduct(position).normalize();
-
-        // Вычисляем правый вектор
         Vector3f right = Vector3f.crossProduct(direction, new Vector3f(0, 1, 0)).normalize();
-
-        // Вычисляем верхний вектор
         Vector3f up = Vector3f.crossProduct(right, direction).normalize();
 
-        // Обновляем положение мыши
         target = Vector3f.add(target, right.multiply(deltaX * 0.01f));
         target = Vector3f.add(target, up.multiply(deltaY * 0.01f));
 
-        camera.setTarget(target);
+        activeCamera.setTarget(target);
 
         lastMouseX = event.getX();
         lastMouseY = event.getY();
     }
 
-    /**
-     * Удаление модели из списка
-     */
     @FXML
     private void onRemoveModelButtonClick() {
         if (activeModelIndex != -1) {
-            // Удаляем модель из списка
             models.remove(activeModelIndex);
             updateModelList();
 
-            // Сбрасываем активную модель
             if (models.isEmpty()) {
                 mesh = null;
                 activeModelIndex = -1;
@@ -538,9 +522,6 @@ public class GuiController {
         }
     }
 
-    /**
-     * Обновление списка моделей(для интерфейса)
-     */
     private void updateModelList() {
         modelListView.getItems().clear();
         for (Model model : models) {
@@ -548,13 +529,10 @@ public class GuiController {
         }
     }
 
-    /**
-     * Установка активной модели
-     */
     private void setActiveModel(int index) {
         if (index >= 0 && index < models.size()) {
             activeModelIndex = index;
-            mesh = models.get(index); // Устанавливаем mesh как активную модель
+            mesh = models.get(index);
             System.out.println("Активная модель: " + mesh.getName());
         } else {
             activeModelIndex = -1;
@@ -563,9 +541,6 @@ public class GuiController {
         }
     }
 
-    /**
-     * Удаление по нажатию кнопки
-     */
     @FXML
     private void handleRemoveVerticesButtonClick(ActionEvent event) {
         if (activeModelIndex != -1) {
@@ -577,9 +552,6 @@ public class GuiController {
         }
     }
 
-    /**
-     * Нажатие кнопки
-     */
     private void handleKeyPressed(KeyEvent event) {
         if (event.getCode() == KeyCode.DELETE) {
             if (activeModelIndex != -1) {
@@ -589,6 +561,7 @@ public class GuiController {
             }
         }
     }
+
     private void handleMousePressed(MouseEvent event) {
         lastMouseX = event.getSceneX();
         lastMouseY = event.getSceneY();
@@ -600,7 +573,6 @@ public class GuiController {
             double deltaX = event.getSceneX() - lastMouseX;
             double deltaY = event.getSceneY() - lastMouseY;
 
-            // Обновляем вращение камеры в зависимости от движения мыши
             updateCameraRotation(deltaX, deltaY);
 
             lastMouseX = event.getSceneX();
@@ -614,20 +586,27 @@ public class GuiController {
 
     private void handleMouseScroll(ScrollEvent event) {
         double deltaY = event.getDeltaY();
-        Vector3f direction = camera.getTarget().deduct(camera.getPosition()).normalize();
-        camera.movePosition(direction.multiply((float) (deltaY * ZOOM_SENSITIVITY)));
+        Camera activeCamera = cameraManager.getActiveCamera();
+        if (activeCamera != null) {
+            Vector3f direction = activeCamera.getTarget().deduct(activeCamera.getPosition()).normalize();
+            activeCamera.movePosition(direction.multiply((float) (deltaY * ZOOM_SENSITIVITY)));
+        }
     }
 
     private void updateCameraRotation(double deltaX, double deltaY) {
-        float sensitivity = 0.1f;//сенса
+        float sensitivity = 0.1f;
         float yaw = (float) (-deltaX * sensitivity);
         float pitch = (float) (-deltaY * sensitivity);
 
-        camera.rotateAroundTarget(yaw, pitch);
+        Camera activeCamera = cameraManager.getActiveCamera();
+        if (activeCamera != null) {
+            activeCamera.rotateAroundTarget(yaw, pitch);
+        }
     }
 
-    private boolean isTriangulationApplied = false; // Флаг для проверки, была ли уже применена триангуляция
-    private Model originalModel; // Переменная для хранения оригинальной модели
+    private boolean isTriangulationApplied = false;
+    private Model originalModel;
+
     @FXML
     private void handleTriangulate(ActionEvent event) {
         if (!isTriangulationApplied) {
@@ -635,7 +614,7 @@ public class GuiController {
             System.out.println("Триангуляция включена");
             if (activeModelIndex != -1) {
                 Model activeModel = models.get(activeModelIndex);
-                originalModel = activeModel; // Сохраняем оригинальную модель
+                originalModel = activeModel;
                 models.set(activeModelIndex, Triangulation.getTriangulatedModel(activeModel));
                 isTriangulationApplied = true;
                 timeline.playFromStart();
@@ -651,8 +630,8 @@ public class GuiController {
         isTriangulationApplied = false;
         System.out.println("Триангуляция отключена");
         if (activeModelIndex != -1) {
-            models.set(activeModelIndex, loadOriginalModel()); // Возвращаем оригинальную модель
-            timeline.playFromStart(); // Перерисовываем сцену
+            models.set(activeModelIndex, loadOriginalModel());
+            timeline.playFromStart();
         }
     }
 
@@ -660,19 +639,85 @@ public class GuiController {
     private void handleEnableRasterization(ActionEvent event) {
         isRasterizationEnabled = true;
         System.out.println("Растеризация включена");
-        timeline.playFromStart(); // Перерисовываем сцену
+        timeline.playFromStart();
     }
 
     @FXML
     private void handleDisableRasterization(ActionEvent event) {
         isRasterizationEnabled = false;
         System.out.println("Растеризация отключена");
-        timeline.playFromStart(); // Перерисовываем сцену
+        timeline.playFromStart();
     }
-    // Возвращаем сохранённую оригинальную модель
-    private Model loadOriginalModel() {
 
+    private Model loadOriginalModel() {
         return originalModel;
     }
 
+    @FXML
+    private void handleAddCamera() {
+        Camera newCamera = new Camera(
+                new Vector3f(0, 0, 100),
+                new Vector3f(0, 0, 0),
+                1.0F, 1, 0.01F, 100
+        );
+        cameraManager.addCamera(newCamera);
+        updateCameraComboBox();
+        updateActiveCameraLabel();
+
+        canvas.requestFocus();
+    }
+
+    @FXML
+    private void handleRemoveCamera() {
+        int activeIndex = cameraManager.getActiveCameraIndex();
+        if (activeIndex >= 0) {
+            cameraManager.removeCamera(activeIndex);
+            updateCameraComboBox();
+            updateActiveCameraLabel();
+        }
+    }
+
+    @FXML
+    private void handleSwitchCamera() {
+        int nextIndex = (cameraManager.getActiveCameraIndex() + 1) % cameraManager.getCameras().size();
+        cameraManager.setActiveCamera(nextIndex);
+        updateActiveCameraLabel();
+    }
+
+    private void updateActiveCameraLabel() {
+        Camera activeCamera = cameraManager.getActiveCamera();
+        if (activeCamera != null) {
+            activeCameraLabel.setText("Активная камера: " + cameraManager.getActiveCameraIndex());
+        } else {
+            activeCameraLabel.setText("Нет активной камеры");
+        }
+    }
+
+    @FXML
+    private void handleCameraSelection() {
+        int selectedIndex = cameraComboBox.getSelectionModel().getSelectedIndex();
+        if (selectedIndex >= 0 && selectedIndex < cameraManager.getCameras().size()) {
+            cameraManager.setActiveCamera(selectedIndex);
+            updateActiveCameraLabel();
+
+            canvas.setOnKeyPressed(this::handleKeyPressed);
+            canvas.setOnKeyReleased(this::handleKeyReleased);
+
+            canvas.requestFocus();
+        }
+    }
+
+    private void updateCameraComboBox() {
+        cameraComboBox.getItems().clear();
+        for (int i = 0; i < cameraManager.getCameras().size(); i++) {
+            cameraComboBox.getItems().add("Камера " + i);
+        }
+        cameraComboBox.getSelectionModel().select(cameraManager.getActiveCameraIndex());
+    }
+
+    private void handleKeyReleased(KeyEvent event) {
+        if (event.getCode() == KeyCode.SHIFT) {
+            // Ничего не делаем, так как выделение уже сохранено
+        }
+    }
 }

@@ -195,4 +195,17 @@
             <Canvas fx:id="canvas" width="1600" height="870" style="-fx-border-color: black; -fx-border-width: 1;" />
         </HBox>
     </VBox>
+    <Accordion AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+        <panes>
+            <!-- Камеры -->
+            <TitledPane text="Camera Settings">
+                <VBox fx:id="cameraControlsPanel" spacing="10" alignment="CENTER" layoutX="10" layoutY="10">
+                    <Button fx:id="addCameraButton" text="Добавить камеру" onAction="#handleAddCamera"/>
+                    <Button fx:id="removeCameraButton" text="Удалить камеру" onAction="#handleRemoveCamera"/>
+
+                    <ComboBox fx:id="cameraComboBox" onAction="#handleCameraSelection"/>
+                </VBox>
+            </TitledPane>
+        </panes>
+    </Accordion>
 </AnchorPane>

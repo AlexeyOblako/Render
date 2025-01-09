@@ -21,7 +21,7 @@ public class RenderEngine {
 
     public static void render(
             final GraphicsContext graphicsContext,
-            final Camera camera,
+            final CameraManager cameraManager,
             final List<Model> models,
             final int width,
             final int height,
@@ -30,6 +30,11 @@ public class RenderEngine {
             final Color backgroundColor,
             final boolean isRasterizationEnabled // Новый параметр
     ) {
+        Camera camera = cameraManager.getActiveCamera(); // Получаем активную камеру
+        if (camera == null) {
+            return; // Если камеры нет, ничего не делаем
+        }
+
         graphicsContext.setStroke(modelColor);
         graphicsContext.setFill(backgroundColor);
         graphicsContext.fillRect(0, 0, width, height);
