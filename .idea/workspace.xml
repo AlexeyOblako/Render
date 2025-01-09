@@ -4,16 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cec51d7d-17e3-443a-8bab-359958c22010" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/render_engine/CameraManager.java" afterDir="false" />
+    <list default="true" id="cec51d7d-17e3-443a-8bab-359958c22010" name="Changes" comment="добавлен CameraManager (добавление камер и смена между ними)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/GuiController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/GuiController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/render_engine/Camera.java" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/render_engine/Camera.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/render_engine/RenderEngine.java" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/src/main/java/com/cgvsu/render_engine/RenderEngine.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Simple3DViewer/src/main/resources/com/cgvsu/fxml/gui.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/src/main/resources/com/cgvsu/fxml/gui.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/GuiController.class" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/GuiController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/fxml/gui.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/fxml/gui.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/render_engine/RenderEngine.class" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/render_engine/RenderEngine.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/render_engine/Camera.class" beforeDir="false" afterPath="$PROJECT_DIR$/Simple3DViewer/target/classes/com/cgvsu/render_engine/Camera.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,22 +38,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/programmist/CGVSU-main/3DModels/SimpleModelsForReaderTests/Torus.obj&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "D:/render/Render",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Application.Main">
     <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="com.cgvsu.Main" />
@@ -157,6 +150,7 @@
       <option name="presentableId" value="Default" />
       <updated>1733687775171</updated>
       <workItem from="1736285507692" duration="1909000" />
+      <workItem from="1736394978326" duration="352000" />
     </task>
     <task id="LOCAL-00001" summary="Vse pochinil, ostalos testi dobavit">
       <option name="closed" value="true" />
@@ -206,7 +200,15 @@
       <option name="project" value="LOCAL" />
       <updated>1736289163882</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="добавлен CameraManager (добавление камер и смена между ними)">
+      <option name="closed" value="true" />
+      <created>1736393919150</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1736393919150</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -231,6 +233,7 @@
     <MESSAGE value="1 чел добавлен, вроде частично" />
     <MESSAGE value="обновлена триангуляция (вкл/выкл), кнопки под растеризацию" />
     <MESSAGE value="пофикшен баг с трианг" />
-    <option name="LAST_COMMIT_MESSAGE" value="пофикшен баг с трианг" />
+    <MESSAGE value="добавлен CameraManager (добавление камер и смена между ними)" />
+    <option name="LAST_COMMIT_MESSAGE" value="добавлен CameraManager (добавление камер и смена между ними)" />
   </component>
 </project>

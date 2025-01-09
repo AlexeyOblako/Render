@@ -208,4 +208,6 @@
             </TitledPane>
         </panes>
     </Accordion>
+
+    <Label fx:id="activeCameraLabel" layoutY="400" layoutX="220" text="Активная камера: 0" />
 </AnchorPane>
